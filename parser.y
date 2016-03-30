@@ -1,4 +1,5 @@
 %{
+  #include "common.h"
 	#include <stdio.h>
 %}
 
@@ -8,24 +9,23 @@
 %token T_CREATE
 %token T_TABLE
 %token T_STRING
-%token T_OPEN_PARENTHESIS
-%token T_CLOSE_PARENTHESIS
 %token T_INT
 %token T_VARCHAR
 %token T_FLOAT
-%token T_COMMA
-%token T_SEMICOLON
+%token D_STRING
+%token D_INTEGER
+%token D_FLOAT
 
 %start Input
 
 %% /* Regras */
 
 Start_create_table:
-  T_CREATE T_TABLE T_STRING T_OPEN_PARENTHESIS
+  T_CREATE T_TABLE T_STRING '(' 
 ;
 
 Finish_create_table:
-  T_CLOSE_PARENTHESIS T_SEMICOLON
+  ')' ';'
 ;
 
 Type_specifier:
@@ -35,7 +35,7 @@ Type_specifier:
 ;
 
 Create_column:
-  T_STRING " " Type_specifier T_COMMA
+  T_STRING " " Type_specifier ','
 ;
 
 Input:
@@ -46,10 +46,19 @@ Input:
 
 %% /* Código C */
 
-int yyerror(char *s){
-  printf("%s\n", s);
+void yyerror(const char* errmsg)
+{
+  printf("\n*** Erro: %s, on line: \n", errmsg);
+}
+ 
+int yywrap(void) 
+{ 
+  return 1;
+}
+ 
+int main(int argc, char** argv)
+{
+     yyparse();
+     return 0;
 }
 
-int main(void) {
-  yyparse();
-}

@@ -30,3 +30,8 @@
 
 # Debug files
 *.dSYM/
+
+# Compiler
+
+*.c
+parse.tab.h

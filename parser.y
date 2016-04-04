@@ -21,7 +21,7 @@
 %% /* Regras */
 
 Start_create_table:
-  T_CREATE T_TABLE T_STRING '(' 
+  T_CREATE T_TABLE D_STRING '(' Create_column
 ;
 
 Finish_create_table:
@@ -35,7 +35,9 @@ Type_specifier:
 ;
 
 Create_column:
-  T_STRING " " Type_specifier ','
+  D_STRING Type_specifier Finish_create_table
+  | D_STRING Type_specifier ',' Create_column
+  
 ;
 
 Input:

@@ -1,6 +1,8 @@
 %{
   #include "common.h"
 	#include <stdio.h>
+
+  FILE *yyin;
 %}
 
 
@@ -21,7 +23,7 @@
 %% /* Regras */
 
 Start_create_table:
-  T_CREATE T_TABLE T_STRING '(' 
+  T_CREATE T_TABLE D_STRING '(' 
 ;
 
 Finish_create_table:
@@ -31,11 +33,11 @@ Finish_create_table:
 Type_specifier:
   T_INT
   | T_VARCHAR
-  | T_FLOAT
+  | D_FLOAT
 ;
 
 Create_column:
-  T_STRING " " Type_specifier ','
+  D_STRING " " Type_specifier ','
 ;
 
 Input:
@@ -58,7 +60,21 @@ int yywrap(void)
  
 int main(int argc, char** argv)
 {
+  
+  FILE *file = fopen("arquivo_entrada.sql", "r");
+
+  if(!file) {
+    printf("I can't open arquivo_entrada.sql\n");
+    return -1;
+  }
+
+  yyin = file;
+
+  do {
      yyparse();
-     return 0;
+
+  } while(!feof(yyin));
+  
+  return 0;
 }
 

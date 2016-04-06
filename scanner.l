@@ -22,7 +22,7 @@ ANY_CHAR .
 "FLOAT" { return T_FLOAT; }
 [\(\)\{\}:;=,] {return yytext[0];}
 
-{STRING} { return D_STRING; }
+{STRING} {yylval.strval = strdup(yytext);return D_STRING;}
 {INTEGER} { return D_INTEGER; }
 {FLOAT} { return D_FLOAT; }
 

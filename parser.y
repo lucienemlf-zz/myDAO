@@ -2,11 +2,16 @@
   #include "common.h"
 	#include <stdio.h>
 
+  int columns = 0;
   FILE *yyin;
 %}
 
-
 /* Definições */
+
+%union
+{
+  char * strval;
+}
 
 %token T_CREATE
 %token T_TABLE
@@ -15,6 +20,7 @@
 %token T_VARCHAR
 %token T_FLOAT
 %token D_STRING
+%type <strval> D_STRING
 %token D_INTEGER
 %token D_FLOAT
 
@@ -33,12 +39,12 @@ Finish_create_table:
 Type_specifier:
   T_INT
   | T_VARCHAR
-  | D_FLOAT
+  | T_FLOAT
 ;
 
 Create_column:
-  D_STRING Type_specifier Finish_create_table
-  | D_STRING Type_specifier ',' Create_column
+  D_STRING Type_specifier Finish_create_table {columns++; printf("%s\n",$1);}
+  | D_STRING Type_specifier ',' Create_column {columns++; printf("%s\n",$1);}
 ;
 
 Input:
@@ -58,9 +64,9 @@ int yywrap(void)
 { 
   return 1;
 }
- 
+
 int main(int argc, char** argv)
-{
+{ 
   
   FILE *file = fopen("arquivo_entrada.sql", "r");
 
@@ -76,6 +82,7 @@ int main(int argc, char** argv)
 
   } while(!feof(yyin));
   
+  printf("\nNumero de colunas: %d\n", columns);
   return 0;
 }
 

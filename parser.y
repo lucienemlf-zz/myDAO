@@ -1,7 +1,7 @@
 %{
   #include "common.h"
 	#include <stdio.h>
-
+  #include "symbol_table.h"
   int columns = 0;
   FILE *yyin;
 %}
@@ -29,7 +29,7 @@
 %% /* Regras */
 
 Start_create_table:
-  T_CREATE T_TABLE D_STRING '(' Create_column
+  T_CREATE T_TABLE D_STRING '(' Create_column {insert_entity(entity_list_pointer, $3);}
 ;
 
 Finish_create_table:
@@ -43,8 +43,8 @@ Type_specifier:
 ;
 
 Create_column:
-  D_STRING Type_specifier Finish_create_table {columns++; printf("%s\n",$1);}
-  | D_STRING Type_specifier ',' Create_column {columns++; printf("%s\n",$1);}
+  D_STRING Type_specifier Finish_create_table {}
+  | D_STRING Type_specifier ',' Create_column {}
 ;
 
 Input:
@@ -68,6 +68,9 @@ int yywrap(void)
 int main(int argc, char** argv)
 { 
   
+  entity_list_pointer = (entity_instance*) malloc(sizeof(entity_instance));
+  entity_list_pointer->next_entity = NULL;
+  
   FILE *file = fopen("arquivo_entrada.sql", "r");
 
   if(!file) {
@@ -77,12 +80,11 @@ int main(int argc, char** argv)
 
   yyin = file;
 
-  do {
-     yyparse();
-
-  } while(!feof(yyin));
+  yyparse();
   
   printf("\nNumero de colunas: %d\n", columns);
+  print_entity_list(entity_list_pointer);
+
   return 0;
 }
 

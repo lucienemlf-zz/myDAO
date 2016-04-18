@@ -37,7 +37,7 @@ column_instance *column_list_pointer;
 void insert_entity(entity_instance *list_pointer, char entity_name_insert[MAX])
 {
 	entity_instance *new_entity, *first_entity;
-	new_entity = (entity_instance*)malloc(sizeof(entity_instance));
+	new_entity = (entity_instance*) malloc(sizeof(entity_instance));
 	strcpy(new_entity->entity_name, entity_name_insert);
 	first_entity = list_pointer->next_entity;
 	list_pointer->next_entity = new_entity;
@@ -99,28 +99,38 @@ int search_column(char column_name_insert[MAX], char entity_name_insert[MAX])
     }
 }
 
-void print_entity_list(entity_instance *list_pointer)
+int print_entity_list(entity_instance *list_pointer)
 {
+	if(list_pointer==NULL){ 
+		printf("There is no instance\n");
+		return -1;
+	}
 	entity_instance *auxiliary_pointer;
 	auxiliary_pointer = list_pointer->next_entity;
 	while(auxiliary_pointer != NULL)
 	{
-		printf("%s.\n",auxiliary_pointer->entity_name);
+		printf("%s\n",auxiliary_pointer->entity_name);
 		auxiliary_pointer = auxiliary_pointer->next_entity;
 	}
+	return 0;
 }
 
-void print_column_list(column_instance *list_pointer)
+int print_column_list(column_instance *list_pointer)
 {
+	if(list_pointer==NULL){ 
+		printf("There is no column\n");
+		return -1;
+	}
 	column_instance *auxiliary_pointer;
 	auxiliary_pointer = list_pointer->next_column;
 	while(auxiliary_pointer != NULL)
 	{
-		printf("%s.\n",auxiliary_pointer->column_name);
-		printf("%s.\n",auxiliary_pointer->entity_name);
-		printf("%s.\n",auxiliary_pointer->column_type);
+		printf("%s\n",auxiliary_pointer->column_name);
+		printf("%s\n",auxiliary_pointer->entity_name);
+		printf("%s\n",auxiliary_pointer->column_type);
 		auxiliary_pointer = auxiliary_pointer->next_column;
 	}
+	return 0;
 }
 
 #endif

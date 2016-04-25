@@ -21,6 +21,9 @@
 %token T_FLOAT
 %token D_STRING
 %type <strval> D_STRING
+%type <strval> T_INT
+%type <strval> T_VARCHAR
+%type <strval> T_FLOAT
 %token D_INTEGER
 %token D_FLOAT
 
@@ -29,7 +32,7 @@
 %% /* Regras */
 
 Start_create_table:
-  T_CREATE T_TABLE D_STRING '(' Create_column {insert_entity(entity_list_pointer, $3);}
+  T_CREATE T_TABLE D_STRING '(' Create_column {insert_element(element_list_pointer, $3, ENTITY, "NULL");}
 ;
 
 Finish_create_table:
@@ -43,8 +46,8 @@ Type_specifier:
 ;
 
 Create_column:
-  D_STRING Type_specifier Finish_create_table {}
-  | D_STRING Type_specifier ',' Create_column {}
+  D_STRING Type_specifier Finish_create_table {insert_element(element_list_pointer, $1, COLUMN, "$2");}
+  | D_STRING Type_specifier ',' Create_column {insert_element(element_list_pointer, $1, COLUMN, "$2");}
 ;
 
 Input:
@@ -67,9 +70,8 @@ int yywrap(void)
 
 int main(int argc, char** argv)
 { 
-  
-  entity_list_pointer = (entity_instance*) malloc(sizeof(entity_instance));
-  entity_list_pointer->next_entity = NULL;
+  element_list_pointer = (element_instance*) malloc(sizeof(element_instance));
+  element_list_pointer->next_element = NULL;
   
   FILE *file = fopen("arquivo_entrada.sql", "r");
 
@@ -82,9 +84,9 @@ int main(int argc, char** argv)
 
   yyparse();
   
-  printf("\nNumero de colunas: %d\n", columns);
-  print_entity_list(entity_list_pointer);
-
+  //printf("\nNumero de colunas: %d\n", columns);
+  print_element_list(element_list_pointer);
+  
   return 0;
 }
 

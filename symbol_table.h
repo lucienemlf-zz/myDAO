@@ -10,125 +10,53 @@
 #define FOUND 1
 #define NOT_FOUND 0
 
-//Structure for Entities
-struct entity
-{
-	char entity_name[MAX];
-	struct entity *next_entity;
-};
+#define COLUMN 2
+#define ENTITY 3
+
 
 //Structure for Columns
-struct column
+struct element
 {
-	char column_name[MAX];
-	char column_type[MAX];
-	char entity_name[MAX];
-	struct column *next_column;
+	char element_name[MAX];
+	int element_scope;
+	char element_type[MAX];
+	struct element *next_element;
 };
 
 //Structures
-typedef struct entity entity_instance;
-typedef struct column column_instance;
+typedef struct element element_instance;
 
 //Pointers
-entity_instance *entity_list_pointer;
-column_instance *column_list_pointer;
+element_instance *element_list_pointer;
 
-void insert_entity(entity_instance *list_pointer, char entity_name_insert[MAX])
+void insert_element(element_instance *list_pointer, char element_name_insert[MAX], int element_scope_insert, char element_type_insert[MAX])
 {
-	entity_instance *new_entity, *first_entity;
-	new_entity = (entity_instance*) malloc(sizeof(entity_instance));
-	strcpy(new_entity->entity_name, entity_name_insert);
-	first_entity = list_pointer->next_entity;
-	list_pointer->next_entity = new_entity;
-	new_entity->next_entity = first_entity;
+	element_instance *new_element, *first_element;
+	new_element = (element_instance*) malloc(sizeof(element_instance));
+	strcpy(new_element->element_name, element_name_insert);
+	new_element->element_scope = element_scope_insert;
+	strcpy(new_element->element_type, element_type_insert);
+	first_element = list_pointer->next_element;
+	list_pointer->next_element = new_element;
+	new_element->next_element = first_element;
 }
 
-void insert_column(column_instance *list_pointer, char column_name_insert[MAX], char column_type_insert[MAX], char entity_name_insert[MAX])
-{
-	column_instance *new_column, *first_column;
-	new_column = (column_instance*)malloc(sizeof(column_instance));
-	strcpy(new_column->column_name, column_name_insert);
-	strcpy(new_column->column_type, column_type_insert);
-	strcpy(new_column->entity_name, entity_name_insert);
-	first_column = list_pointer->next_column;
-	list_pointer->next_column = new_column;
-	new_column->next_column = first_column;
-}
 
-int search_entity(char entity_name_insert[MAX])
-{
-	if(entity_list_pointer == NULL)
-    {
-        return NOT_FOUND;
-    }
-    else
-    {
-        entity_instance *auxiliary_pointer = entity_list_pointer;
-        while(auxiliary_pointer != NULL)
-        {
-            if (strcmp(entity_name_insert, auxiliary_pointer->entity_name) == 0)
-            {
-                return FOUND;
-            }
-            auxiliary_pointer = auxiliary_pointer->next_entity;
-        }
-        return NOT_FOUND;
-    }
-}
-
-int search_column(char column_name_insert[MAX], char entity_name_insert[MAX])
-{
-	if(column_list_pointer == NULL)
-    {
-        return NOT_FOUND;
-    }
-    else
-    {
-        column_instance *auxiliary_pointer = column_list_pointer;
-        while(auxiliary_pointer != NULL)
-        {
-            if (strcmp(entity_name_insert, auxiliary_pointer->entity_name) == 0
-            	&& strcmp(column_name_insert, auxiliary_pointer->column_name) == 0)
-            {
-                return FOUND;
-            }
-            auxiliary_pointer = auxiliary_pointer->next_column;
-        }
-        return NOT_FOUND;
-    }
-}
-
-int print_entity_list(entity_instance *list_pointer)
+int print_element_list(element_instance *list_pointer)
 {
 	if(list_pointer==NULL){ 
 		printf("There is no instance\n");
 		return -1;
 	}
-	entity_instance *auxiliary_pointer;
-	auxiliary_pointer = list_pointer->next_entity;
+	element_instance *auxiliary_pointer;
+	auxiliary_pointer = list_pointer->next_element;
 	while(auxiliary_pointer != NULL)
 	{
-		printf("%s\n",auxiliary_pointer->entity_name);
-		auxiliary_pointer = auxiliary_pointer->next_entity;
-	}
-	return 0;
-}
+		printf("%s\n",auxiliary_pointer->element_name);
+		printf("%d\n",auxiliary_pointer->element_scope);
+		printf("%s\n",auxiliary_pointer->element_type);
 
-int print_column_list(column_instance *list_pointer)
-{
-	if(list_pointer==NULL){ 
-		printf("There is no column\n");
-		return -1;
-	}
-	column_instance *auxiliary_pointer;
-	auxiliary_pointer = list_pointer->next_column;
-	while(auxiliary_pointer != NULL)
-	{
-		printf("%s\n",auxiliary_pointer->column_name);
-		printf("%s\n",auxiliary_pointer->entity_name);
-		printf("%s\n",auxiliary_pointer->column_type);
-		auxiliary_pointer = auxiliary_pointer->next_column;
+		auxiliary_pointer = auxiliary_pointer->next_element;
 	}
 	return 0;
 }

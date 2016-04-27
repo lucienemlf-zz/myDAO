@@ -24,6 +24,7 @@
 %type <strval> T_INT
 %type <strval> T_VARCHAR
 %type <strval> T_FLOAT
+%type <strval> Type_specifier
 %token D_INTEGER
 %token D_FLOAT
 
@@ -46,8 +47,8 @@ Type_specifier:
 ;
 
 Create_column:
-  D_STRING Type_specifier Finish_create_table {insert_element(element_list_pointer, $1, COLUMN, "$2");}
-  | D_STRING Type_specifier ',' Create_column {insert_element(element_list_pointer, $1, COLUMN, "$2");}
+  D_STRING Type_specifier Finish_create_table {insert_element(element_list_pointer, $1, COLUMN, $2);}
+  | D_STRING Type_specifier ',' Create_column {insert_element(element_list_pointer, $1, COLUMN, $2);}
 ;
 
 Input:

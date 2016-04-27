@@ -17,9 +17,9 @@ ANY_CHAR .
 
 "CREATE" { return T_CREATE; }
 "TABLE" { return T_TABLE; } 
-"VARCHAR" { return T_VARCHAR; }
-"INT" { return T_INT; }
-"FLOAT" { return T_FLOAT; }
+"VARCHAR" { yylval.strval = strdup(yytext); return T_VARCHAR; }
+"INT" {yylval.strval = strdup(yytext); return T_INT; }
+"FLOAT" { yylval.strval = strdup(yytext); return T_FLOAT; }
 [\(\)\{\}:;=,] {return yytext[0];}
 
 {STRING} {yylval.strval = strdup(yytext);return D_STRING;}

@@ -71,6 +71,7 @@ void write_java_file(element_instance *list_pointer, int dimension)
 	FILE *file_out;
 	char type_out[dimension][MAX];
 	char name_array[dimension][MAX];
+	char name_upcase[dimension][MAX];
 	char type_array[dimension][MAX];
 	char integer_type[MAX];
 	char varchar_type[MAX];
@@ -144,12 +145,41 @@ void write_java_file(element_instance *list_pointer, int dimension)
 	fprintf(file_out, "\n");
 	fprintf(file_out, "	public %s() {\n", name_array[0]);
 	fprintf(file_out, "\n");
-	fprintf(file_out, "	}\n");
+	fprintf(file_out, "	}\n\n");
+
+
+	//Escrevendo Gettings
+	for(i = 1; i < dimension; i ++)
+	{	
+		//Transformando primeiro char em maiusculo
+		strcpy(name_upcase[i], name_array[i]);
+		printf("\n %s \n", name_upcase[i]);
+		name_upcase[i][0] = toupper(name_array[i][0]);
+		printf("\n %s \n", name_upcase[i]);
+
+		fprintf(file_out, "	public get%s () {\n", name_upcase[i]);
+		fprintf(file_out, "\t\treturn this.%s;\n", name_array[i]);
+		fprintf(file_out, "	}\n\n");
+	}
+
+	//Escrevendo Settings
+	for(i = 1; i < dimension; i ++)
+	{
+		
+	}
+
+	//Fechando classe
 	fprintf(file_out, "}");
 
 	printf("Writing java file completed.\n");
 
 	fclose(file_out);
 }
+
+void write_java_DAO_file(element_instance *list_pointer, int dimension)
+{
+
+}
+
 
 #endif

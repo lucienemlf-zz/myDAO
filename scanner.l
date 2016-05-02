@@ -5,7 +5,7 @@
 
 /* Definições */
 
-STRING [a-z][a-z0-9]*
+STRING [a-zA-Z][a-z0-9]*
 WHITESPACE [ \n\r\t]+
 FLOAT [0-9]+\.[0-9]+
 INTEGER [0-9]+

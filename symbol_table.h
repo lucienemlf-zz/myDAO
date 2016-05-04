@@ -183,7 +183,44 @@ void write_java_file(element_instance *list_pointer, int dimension)
 void write_java_DAO_file(element_instance *list_pointer, int dimension)
 {
 
+
 }
 
+void mount_method_insert()
+{	
+	
+
+	//Transformando primeiro char em maiusculo
+	//REFATORAR, CÓDIGO DUPLICADO
+	FILE *file_out;
+	char file_out_name[MAX], source_string[MAX];
+	strcpy(file_out_name, "PessoaDAO");
+	strcpy(source_string, ".java");
+	strcat(file_out_name, source_string);
+
+	printf("Writing java insertDAO file...\n");
+	file_out = fopen(file_out_name, "w");
+
+	if(!file_out)
+	{
+		printf("I can't open javaDAO file.\n");
+		exit(1);
+	}	
+
+	//Escrevendo carcaça do método INSERT
+	fprintf(file_out, "	public void inserir(s s) {\n");
+	fprintf(file_out, "\t\tString sql = 'INSERT INTO s (s, s) VALUE (?, ?)';\n");//Vai ser um for
+	fprintf(file_out, "\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
+	//Vai ser um for
+		fprintf(file_out, "\t\tstatement.setString(1, 'Teste 1');\n");
+		fprintf(file_out, "\t\tstatement.setString(2, 'Teste 2');\n");
+	
+	fprintf(file_out, "\t\tint rowsInserted = statement.executeUpdate();\n");
+	fprintf(file_out, "\t\tif (rowsInserted > 0) {\n");
+	fprintf(file_out, "\t\t\tSystem.out.println('A new user was inserted successfully!');\n");
+	fprintf(file_out, "\t\t}\n");
+	fprintf(file_out, "\t}");
+		
+}
 
 #endif

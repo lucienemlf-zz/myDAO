@@ -38,7 +38,7 @@ Start_create_table:
 ;
 
 Finish_create_table:
-  ')' ';'
+  ')' ';' 
 ;
 
 Type_specifier:
@@ -92,6 +92,8 @@ int main(int argc, char** argv)
   printf("\n");
 
   write_java_file(element_list_pointer, elements_number);
+
+  mount_method_insert();
 
   fclose(entry_file);
   

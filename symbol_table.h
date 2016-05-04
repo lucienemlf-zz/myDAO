@@ -237,6 +237,29 @@ void mount_method_delete(FILE *file_out)
 		
 }
 
+
+void mount_method_select(FILE *file_out)
+{	
+
+	//Escrevendo carcaça do método INSERT
+	fprintf(file_out, "	public void selecionar(s s) {\n");
+	fprintf(file_out, "\t\tString sql = 'SELECT * FROM Users';\n");
+	fprintf(file_out, "\t\tStatement statement = conn.createStatement();\n");
+	fprintf(file_out, "\t\tResultSet result = statement.executeQuery(sql);\n");
+	fprintf(file_out, "\t\tint count = 0;\n");
+
+		//Vai ser um for
+		fprintf(file_out, "\t\twhile (result.next()) {\n");
+		fprintf(file_out, "\t\t\tString name = result.getString(2);\n");
+		fprintf(file_out, "\t\t\tString fullname = result.getString('fullname');\n");
+		fprintf(file_out, "\t\t}\n");
+	
+	fprintf(file_out, "\t\tString output = 'User #Teste: Teste1 - Teste2';\n");
+	fprintf(file_out, "\t\tSystem.out.println(String.format(output, ++count, name, fullname));\n");
+	fprintf(file_out, "\t}");
+		
+}
+
 void write_java_DAO_file(element_instance *list_pointer, int dimension)
 {
 	//Transformando primeiro char em maiusculo
@@ -257,6 +280,9 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension)
 	}	
 
 	mount_method_insert(file_out);
+	fprintf(file_out, "\n\n");
+
+	mount_method_select(file_out);
 	fprintf(file_out, "\n\n");
 
 	mount_method_update(file_out);

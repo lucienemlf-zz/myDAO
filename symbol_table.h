@@ -223,4 +223,45 @@ void mount_method_insert()
 		
 }
 
+void mount_method_select()
+{	
+	
+
+	//Transformando primeiro char em maiusculo
+	//REFATORAR, CÓDIGO DUPLICADO
+	FILE *file_out;
+	char file_out_name[MAX], source_string[MAX];
+	strcpy(file_out_name, "PessoaDAO");
+	strcpy(source_string, ".java");
+	strcat(file_out_name, source_string);
+
+	printf("Writing java selectDAO file...\n");
+	file_out = fopen(file_out_name, "w");
+
+	if(!file_out)
+	{
+		printf("I can't open javaDAO file.\n");
+		exit(1);
+	}	
+
+	//Escrevendo carcaça do método INSERT
+	fprintf(file_out, "	public void selecionar(s s) {\n");
+	fprintf(file_out, "\t\tString sql = 'SELECT * FROM Users';\n");
+	fprintf(file_out, "\t\tStatement statement = conn.createStatement();\n");
+	fprintf(file_out, "\t\tResultSet result = statement.executeQuery(sql);\n");
+	fprintf(file_out, "\t\tint count = 0;\n");
+
+		//Vai ser um for
+		fprintf(file_out, "\t\twhile (result.next()) {\n");
+		fprintf(file_out, "\t\t\tString name = result.getString(2);\n");
+		fprintf(file_out, "\t\t\tString fullname = result.getString('fullname');\n");
+		fprintf(file_out, "\t\t}\n");
+	
+	fprintf(file_out, "\t\tString output = 'User #Teste: Teste1 - Teste2';\n");
+	fprintf(file_out, "\t\tSystem.out.println(String.format(output, ++count, name, fullname));\n");
+	fprintf(file_out, "\t}");
+		
+}
+
+
 #endif

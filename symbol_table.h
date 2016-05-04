@@ -180,16 +180,65 @@ void write_java_file(element_instance *list_pointer, int dimension)
 	fclose(file_out);
 }
 
-void write_java_DAO_file(element_instance *list_pointer, int dimension)
-{
 
+void mount_method_insert(FILE *file_out)
+{	
+	
+	//Escrevendo carcaça do método INSERT
+	fprintf(file_out, "	public void inserir(s s) {\n");
+	fprintf(file_out, "\t\tString sql = 'INSERT INTO s (s, s) VALUE (?, ?)';\n");//Vai ser um for
+	fprintf(file_out, "\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
+	//Vai ser um for
+		fprintf(file_out, "\t\tstatement.setString(1, 'Teste 1');\n");
+		fprintf(file_out, "\t\tstatement.setString(2, 'Teste 2');\n");
+	
+	fprintf(file_out, "\t\tint rowsInserted = statement.executeUpdate();\n");
+	fprintf(file_out, "\t\tif (rowsInserted > 0) {\n");
+	fprintf(file_out, "\t\t\tSystem.out.println('A new user was inserted successfully!');\n");
+	fprintf(file_out, "\t\t}\n");
+	fprintf(file_out, "\t}");
 
 }
 
-void mount_method_insert()
+void mount_method_update(FILE *file_out)
 {	
 	
+	//Escrevendo carcaça do método update
+	fprintf(file_out, "	public void autalizar(S s) {\n");
+	fprintf(file_out, "\t\tString sql = 'UPDATE s SET column1=?, column2=? WHERE username=?';\n");//Vai ser um for
+	fprintf(file_out, "\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
+	//Vai ser um for
+		fprintf(file_out, "\t\tstatement.setString(1, 'Teste 1');\n");
+		fprintf(file_out, "\t\tstatement.setString(2, 'Teste 2');\n");
+	
+	fprintf(file_out, "\t\tint rowsInserted = statement.executeUpdate();\n");
+	fprintf(file_out, "\t\tif (rowsInserted > 0) {\n");
+	fprintf(file_out, "\t\t\tSystem.out.println('An existing user was updated successfully!');\n");
+	fprintf(file_out, "\t\t}\n");
+	fprintf(file_out, "\t}");
+		
+}
 
+void mount_method_delete(FILE *file_out)
+{	
+	
+	//Escrevendo carcaça do método excluir
+	fprintf(file_out, "	public void excluir(User user) {\n");
+	fprintf(file_out, "\t\tString sql = 'DELETE FROM User WHERE username=?';\n");//Vai ser um for
+	fprintf(file_out, "\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
+	
+	fprintf(file_out, "\t\tstatement.setString(1, user);\n");
+	
+	fprintf(file_out, "\t\tint rowsInserted = statement.executeUpdate();\n");
+	fprintf(file_out, "\t\tif (rowsInserted > 0) {\n");
+	fprintf(file_out, "\t\t\tSystem.out.println('An existing user was deleted successfully!');\n");
+	fprintf(file_out, "\t\t}\n");
+	fprintf(file_out, "\t}");
+		
+}
+
+void write_java_DAO_file(element_instance *list_pointer, int dimension)
+{
 	//Transformando primeiro char em maiusculo
 	//REFATORAR, CÓDIGO DUPLICADO
 	FILE *file_out;
@@ -207,20 +256,14 @@ void mount_method_insert()
 		exit(1);
 	}	
 
-	//Escrevendo carcaça do método INSERT
-	fprintf(file_out, "	public void inserir(s s) {\n");
-	fprintf(file_out, "\t\tString sql = 'INSERT INTO s (s, s) VALUE (?, ?)';\n");//Vai ser um for
-	fprintf(file_out, "\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
-	//Vai ser um for
-		fprintf(file_out, "\t\tstatement.setString(1, 'Teste 1');\n");
-		fprintf(file_out, "\t\tstatement.setString(2, 'Teste 2');\n");
-	
-	fprintf(file_out, "\t\tint rowsInserted = statement.executeUpdate();\n");
-	fprintf(file_out, "\t\tif (rowsInserted > 0) {\n");
-	fprintf(file_out, "\t\t\tSystem.out.println('A new user was inserted successfully!');\n");
-	fprintf(file_out, "\t\t}\n");
-	fprintf(file_out, "\t}");
-		
+	mount_method_insert(file_out);
+	fprintf(file_out, "\n\n");
+
+	mount_method_update(file_out);
+	fprintf(file_out, "\n\n");
+
+	mount_method_delete(file_out);
+
 }
 
 #endif

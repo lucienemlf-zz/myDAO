@@ -92,8 +92,7 @@ int main(int argc, char** argv)
   printf("\n");
 
   write_java_file(element_list_pointer, elements_number);
-
-  mount_method_insert();
+  write_java_DAO_file(element_list_pointer, elements_number);
 
   fclose(entry_file);
   

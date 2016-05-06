@@ -66,6 +66,22 @@ int print_element_list(element_instance *list_pointer)
 	return elements_counter;
 }
 
+char *write_file_name(char name_array[][MAX], char type)
+{
+	static char file_out_name[MAX], source_string[MAX];
+	strcpy(file_out_name, name_array[0]);
+
+	if(type == 'm'){
+		strcpy(source_string, ".java");
+	}else{
+		strcpy(source_string, "DAO.java");
+	}
+	strcat(file_out_name, source_string);
+
+printf("\n\nDEU CERTO ATE AQUI %s\n\n", file_out_name);	
+	return file_out_name;
+}
+
 void write_java_file(element_instance *list_pointer, int dimension)
 {
 	FILE *file_out;
@@ -120,10 +136,8 @@ void write_java_file(element_instance *list_pointer, int dimension)
 		}
 	}
 
-	char file_out_name[MAX], source_string[MAX];
-	strcpy(file_out_name, name_array[0]);
-	strcpy(source_string, ".java");
-	strcat(file_out_name, source_string);
+	char *file_out_name; 
+	file_out_name = write_file_name(name_array, 'm');
 
 	printf("Writing java file...\n");
 	file_out = fopen(file_out_name, "w");
@@ -262,13 +276,12 @@ void mount_method_select(FILE *file_out)
 
 void write_java_DAO_file(element_instance *list_pointer, int dimension)
 {
-	//Transformando primeiro char em maiusculo
-	//REFATORAR, CÓDIGO DUPLICADO
+
 	FILE *file_out;
-	char file_out_name[MAX], source_string[MAX];
-	strcpy(file_out_name, "PessoaDAO");
-	strcpy(source_string, ".java");
-	strcat(file_out_name, source_string);
+	char *file_out_name; 
+char name_array[dimension][MAX];  // Apagar quando refatorar
+strcpy(name_array[0], "pessoa");
+	file_out_name = write_file_name(name_array, 'd');
 
 	printf("Writing java insertDAO file...\n");
 	file_out = fopen(file_out_name, "w");

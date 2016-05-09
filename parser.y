@@ -73,13 +73,12 @@ int yywrap(void)
 int main(int argc, char** argv)
 { 
   int elements_number;
-  
-  element_list_pointer = (element_instance*)malloc(sizeof(element_instance));
-  element_list_pointer->next_element = NULL;
 
-  entity_list_pointer = (entity_instance*)malloc(sizeof(entity_instance));
-  entity_list_pointer->next_entity = NULL;
+  element_instance *element_pointer;
+  element_list_pointer = initialize_element_list(element_pointer);
 
+  entity_instance *entity_pointer;
+  entity_list_pointer = initialize_entity_list(entity_pointer);  
 
   FILE *entry_file = fopen("arquivo_entrada.sql", "r");
 

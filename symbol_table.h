@@ -10,11 +10,6 @@
 #define COLUMN 1
 #define ENTITY 0
 
-#define INTEIRO 2
-#define VARCHAR 3
-#define FLOAT 4
-
-
 //Structure for Columns
 struct element
 {
@@ -40,6 +35,18 @@ typedef struct entity entity_instance;
 element_instance *element_list_pointer;
 entity_instance *entity_list_pointer;
 
+element_instance *initialize_element_list(element_instance *list_pointer){
+  list_pointer = (element_instance*) malloc (sizeof(element_instance));
+  list_pointer->next_element = NULL;
+  return list_pointer;
+}
+
+
+entity_instance *initialize_entity_list(entity_instance *list_pointer){
+  list_pointer = (entity_instance*) malloc (sizeof(entity_instance));
+  list_pointer->next_entity = NULL;
+  return list_pointer;
+}
 void insert_element(element_instance *list_pointer, char element_name_insert[MAX], int element_scope_insert, char element_type_insert[MAX])
 {
 	element_instance *new_element, *first_element;

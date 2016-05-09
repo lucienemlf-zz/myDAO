@@ -24,11 +24,21 @@ struct element
 	struct element *next_element;
 };
 
+//Structure for Entities
+struct entity 
+{
+  char entity_name[MAX];
+  struct element *element;
+  struct entity *next_entity;
+};
+
 //Structures
 typedef struct element element_instance;
+typedef struct entity entity_instance;
 
 //Pointers
 element_instance *element_list_pointer;
+entity_instance *entity_list_pointer;
 
 void insert_element(element_instance *list_pointer, char element_name_insert[MAX], int element_scope_insert, char element_type_insert[MAX])
 {
@@ -40,6 +50,38 @@ void insert_element(element_instance *list_pointer, char element_name_insert[MAX
 	first_element = list_pointer->next_element;
 	list_pointer->next_element = new_element;
 	new_element->next_element = first_element;
+}
+
+void insert_entity(entity_instance *list_pointer, element_instance *element_insert)
+{
+  entity_instance *new_entity, *first_entity;
+  new_entity = (entity_instance*) malloc(sizeof(entity_instance));
+  strcpy(new_entity->entity_name, element_insert->element_name);
+  new_entity->element = element_insert;
+  first_entity = list_pointer->next_entity;
+  list_pointer->next_entity = new_entity;
+  new_entity->next_entity = first_entity;
+}
+
+void create_entity_list(element_instance *list_pointer)
+{
+	if(list_pointer == NULL)
+	{ 
+		printf("There is no entity.\n");
+		exit(1);
+	}
+
+	element_instance *auxiliary_pointer;
+	auxiliary_pointer = list_pointer->next_element;
+	while(auxiliary_pointer != NULL)
+	{		
+    if(auxiliary_pointer->element_scope == 0)
+    {
+     insert_entity(entity_list_pointer, auxiliary_pointer); 
+    }
+
+		auxiliary_pointer = auxiliary_pointer->next_element;
+	}
 }
 
 int print_element_list(element_instance *list_pointer)
@@ -55,8 +97,8 @@ int print_element_list(element_instance *list_pointer)
 	element_instance *auxiliary_pointer;
 	auxiliary_pointer = list_pointer->next_element;
 	while(auxiliary_pointer != NULL)
-	{
-		printf("%s\n",auxiliary_pointer->element_name);
+	{		
+    printf("%s\n",auxiliary_pointer->element_name);
 		printf("%d\n",auxiliary_pointer->element_scope);
 		printf("%s\n",auxiliary_pointer->element_type);
 
@@ -64,6 +106,24 @@ int print_element_list(element_instance *list_pointer)
 		elements_counter += 1;
 	}
 	return elements_counter;
+}
+
+void print_entity_list(entity_instance *list_pointer)
+{
+	if(list_pointer == NULL)
+	{ 
+		printf("There is no entity.\n");
+		exit(1);
+	}
+
+	entity_instance *auxiliary_pointer;
+	auxiliary_pointer = list_pointer->next_entity;
+	while(auxiliary_pointer != NULL)
+	{		
+    printf("%s\n",auxiliary_pointer->entity_name);
+
+		auxiliary_pointer = auxiliary_pointer->next_entity;
+	}
 }
 
 char *write_file_name(char name_array[][MAX], char type)

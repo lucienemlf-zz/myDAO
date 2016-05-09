@@ -73,9 +73,14 @@ int yywrap(void)
 int main(int argc, char** argv)
 { 
   int elements_number;
+  
   element_list_pointer = (element_instance*)malloc(sizeof(element_instance));
   element_list_pointer->next_element = NULL;
-  
+
+  entity_list_pointer = (entity_instance*)malloc(sizeof(entity_instance));
+  entity_list_pointer->next_entity = NULL;
+
+
   FILE *entry_file = fopen("arquivo_entrada.sql", "r");
 
   if(!entry_file) {
@@ -91,10 +96,19 @@ int main(int argc, char** argv)
   elements_number = print_element_list(element_list_pointer);
   printf("\n");
 
-  write_java_file(element_list_pointer, elements_number);
-  write_java_DAO_file(element_list_pointer, elements_number);
+  create_entity_list(element_list_pointer);
+  
+  printf("Entities found... \n");
+  print_entity_list(entity_list_pointer);
+  printf("\n");
+
+  //write_java_file(element_list_pointer, elements_number);
+  //write_java_DAO_file(element_list_pointer, elements_number);
 
   fclose(entry_file);
-  
+ 
+  free(element_list_pointer);
+  free(entity_list_pointer);
+ 
   return 0;
 }

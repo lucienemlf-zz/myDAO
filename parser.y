@@ -101,8 +101,8 @@ int main(int argc, char** argv)
   print_entity_list(entity_list_pointer);
   printf("\n");
 
-  //write_java_file(element_list_pointer, elements_number);
-  //write_java_DAO_file(element_list_pointer, elements_number);
+  write_java_file(element_list_pointer, elements_number);
+  write_java_DAO_file(element_list_pointer, elements_number);
 
   fclose(entry_file);
  

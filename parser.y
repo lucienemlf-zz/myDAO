@@ -3,7 +3,6 @@
 	#include <stdio.h>
   #include <stdlib.h>
   #include "symbol_table.h"
-  int columns = 0;
   FILE *yyin;
 %}
 
@@ -101,7 +100,17 @@ int main(int argc, char** argv)
   print_entity_list(entity_list_pointer);
   printf("\n");
 
-  write_java_file(element_list_pointer, elements_number);
+  int i;
+
+  entity_instance *auxiliary_pointer;
+  auxiliary_pointer = entity_list_pointer->next_entity;
+
+  for(i = 0; auxiliary_pointer != NULL; i++)
+  {
+    write_java_file(auxiliary_pointer->element, elements_number);
+    auxiliary_pointer = auxiliary_pointer->next_entity;
+  }
+
   write_java_DAO_file(element_list_pointer, elements_number);
 
   fclose(entry_file);

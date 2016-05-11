@@ -1,4 +1,0 @@
-Pessoa
-Nome
-Pessoa
-Varchar

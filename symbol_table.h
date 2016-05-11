@@ -10,7 +10,6 @@
 #define COLUMN 1
 #define ENTITY 0
 
-
 //Structure for Columns
 struct element
 {
@@ -43,13 +42,11 @@ element_instance *initialize_element_list(element_instance *list_pointer){
   return list_pointer;
 }
 
-
 entity_instance *initialize_entity_list(entity_instance *list_pointer){
   list_pointer = (entity_instance*) malloc (sizeof(entity_instance));
   list_pointer->next_entity = NULL;
   return list_pointer;
 }
-
 
 // Declaração das funções da tabela de simbolos
 void insert_element(element_instance *list_pointer, char element_name_insert[MAX], int element_scope_insert, char element_type_insert[MAX]);
@@ -67,7 +64,6 @@ void mount_method_delete(FILE *file_out);
 void mount_method_select(FILE *file_out);
 void write_java_file(element_instance *list_pointer, int dimension);
 void write_java_DAO_file(element_instance *list_pointer, int dimension);
-
 
 void insert_element(element_instance *list_pointer, char element_name_insert[MAX], int element_scope_insert, char element_type_insert[MAX])
 {
@@ -104,10 +100,10 @@ void create_entity_list(element_instance *list_pointer)
 	auxiliary_pointer = list_pointer->next_element;
 	while(auxiliary_pointer != NULL)
 	{		
-    if(auxiliary_pointer->element_scope == 0)
-    {
-     insert_entity(entity_list_pointer, auxiliary_pointer); 
-    }
+    	if(auxiliary_pointer->element_scope == 0)
+    	{
+     		insert_entity(entity_list_pointer, auxiliary_pointer); 
+    	}
 
 		auxiliary_pointer = auxiliary_pointer->next_element;
 	}
@@ -127,7 +123,7 @@ int print_element_list(element_instance *list_pointer)
 	auxiliary_pointer = list_pointer->next_element;
 	while(auxiliary_pointer != NULL)
 	{		
-    printf("%s\n",auxiliary_pointer->element_name);
+    	printf("%s\n",auxiliary_pointer->element_name);
 		printf("%d\n",auxiliary_pointer->element_scope);
 		printf("%s\n",auxiliary_pointer->element_type);
 
@@ -149,8 +145,7 @@ void print_entity_list(entity_instance *list_pointer)
 	auxiliary_pointer = list_pointer->next_entity;
 	while(auxiliary_pointer != NULL)
 	{		
-    printf("%s\n",auxiliary_pointer->entity_name);
-
+    	printf("%s\n",auxiliary_pointer->entity_name);
 		auxiliary_pointer = auxiliary_pointer->next_entity;
 	}
 }
@@ -211,7 +206,7 @@ void write_java_file(element_instance *list_pointer, int dimension)
 	char name_array[dimension][MAX];
 	char name_upcase[dimension][MAX];
 	char type_array[dimension][MAX];
-	int i;
+	int i, real_dimension = 0;
 
 	if(list_pointer == NULL)
 	{
@@ -220,11 +215,21 @@ void write_java_file(element_instance *list_pointer, int dimension)
 	}
 
 	element_instance *auxiliary_pointer;
-	auxiliary_pointer = list_pointer->next_element;
+	auxiliary_pointer = list_pointer;
 	for(i = 0; auxiliary_pointer != NULL; i++)
 	{
 		strcpy(name_array[i], auxiliary_pointer->element_name);
 		strcpy(type_array[i], auxiliary_pointer->element_type);
+		real_dimension++;
+
+		if(auxiliary_pointer->next_element == NULL)
+		{
+			break;
+		}
+		else if(auxiliary_pointer->next_element->element_scope == 0)
+		{
+			break;
+		}
 
 		auxiliary_pointer = auxiliary_pointer->next_element;
 	}
@@ -237,7 +242,7 @@ void write_java_file(element_instance *list_pointer, int dimension)
 	file_out_name = write_file_name(name_array, 'm');
 
 
-	printf("Writing java file...\n");
+	printf("Writing java file for entity %s...\n",name_array[0]);
 	file_out = fopen(file_out_name, "w");
 
 	if(!file_out)
@@ -249,7 +254,7 @@ void write_java_file(element_instance *list_pointer, int dimension)
 	fprintf(file_out, "public class %s {\n", name_array[0]);
 	fprintf(file_out, "\n");
 
-	for(i = 1; i < dimension; i ++)
+	for(i = 1; i < real_dimension; i ++)
 	{
 		fprintf(file_out, "	private %s %s;\n", type_out[i], name_array[i]);
 	}
@@ -259,9 +264,8 @@ void write_java_file(element_instance *list_pointer, int dimension)
 	fprintf(file_out, "\n");
 	fprintf(file_out, "	}\n\n");
 
-
 	//Escrevendo Gettings
-	for(i = 1; i < dimension; i ++)
+	for(i = 1; i < real_dimension; i ++)
 	{	
 		//Transformando primeiro char em maiusculo
 		strcpy(name_upcase[i], name_array[i]);
@@ -273,7 +277,7 @@ void write_java_file(element_instance *list_pointer, int dimension)
 	}
 
 	//Escrevendo Settings
-	for(i = 1; i < dimension; i ++)
+	for(i = 1; i < real_dimension; i ++)
 	{
 		//Transformando primeiro char em maiusculo
 		strcpy(name_upcase[i], name_array[i]);
@@ -287,11 +291,10 @@ void write_java_file(element_instance *list_pointer, int dimension)
 	//Fechando classe
 	fprintf(file_out, "}");
 
-	printf("Writing java file completed.\n");
+	printf("Writing java file for entity %s completed.\n",name_array[0]);
 
 	fclose(file_out);
 }
-
 
 void mount_method_insert(FILE *file_out)
 {	

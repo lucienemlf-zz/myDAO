@@ -10,6 +10,9 @@
 #define COLUMN 1
 #define ENTITY 0
 
+#define FOUND 1
+#define NOT_FOUND 0
+
 //Structure for Columns
 struct element
 {
@@ -17,6 +20,7 @@ struct element
 	int element_scope;
 	char element_type[MAX];
 	struct element *next_element;
+	char entity_name[MAX];
 };
 
 //Structure for Entities
@@ -62,7 +66,7 @@ void mount_method_insert(FILE *file_out);
 void mount_method_update(FILE *file_out);
 void mount_method_delete(FILE *file_out);
 void mount_method_select(FILE *file_out);
-void write_java_file(element_instance *list_pointer, int dimension);
+void write_java_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX]);
 void write_java_DAO_file(element_instance *list_pointer, int dimension);
 
 void insert_element(element_instance *list_pointer, char element_name_insert[MAX], int element_scope_insert, char element_type_insert[MAX])
@@ -95,7 +99,7 @@ void create_entity_list(element_instance *list_pointer)
 		printf("There is no entity.\n");
 		exit(1);
 	}
-
+	char entity_name_for_element[MAX];
 	element_instance *auxiliary_pointer;
 	auxiliary_pointer = list_pointer->next_element;
 	while(auxiliary_pointer != NULL)
@@ -103,6 +107,10 @@ void create_entity_list(element_instance *list_pointer)
     	if(auxiliary_pointer->element_scope == 0)
     	{
      		insert_entity(entity_list_pointer, auxiliary_pointer); 
+     		strcpy(entity_name_for_element, auxiliary_pointer->element_name);
+    	}
+    	else{
+    		strcpy(auxiliary_pointer->entity_name, entity_name_for_element);
     	}
 
 		auxiliary_pointer = auxiliary_pointer->next_element;
@@ -123,10 +131,14 @@ int print_element_list(element_instance *list_pointer)
 	auxiliary_pointer = list_pointer->next_element;
 	while(auxiliary_pointer != NULL)
 	{		
-    	printf("%s\n",auxiliary_pointer->element_name);
-		printf("%d\n",auxiliary_pointer->element_scope);
-		printf("%s\n",auxiliary_pointer->element_type);
-
+    	printf("%s\t",auxiliary_pointer->element_name);
+		printf("%d\t",auxiliary_pointer->element_scope);
+		printf("%s\t",auxiliary_pointer->element_type);
+		if(auxiliary_pointer->element_scope == 1)
+		{
+			printf("%s\t",auxiliary_pointer->entity_name);
+		}
+		printf("\n");
 		auxiliary_pointer = auxiliary_pointer->next_element;
 		elements_counter += 1;
 	}
@@ -165,6 +177,44 @@ char *write_file_name(char name_array[][MAX], char type)
 	return file_out_name;
 }
 
+int search_entity(char entity_name_insert[MAX])
+{
+	if(entity_list_pointer == NULL)
+    {
+        return NOT_FOUND;
+    }
+    else
+    {
+        entity_instance *auxiliary_pointer = entity_list_pointer;
+        while(auxiliary_pointer != NULL)
+        {
+            if (strcmp(entity_name_insert, auxiliary_pointer->entity_name) == 0)
+            {
+                return FOUND;
+            }
+            auxiliary_pointer = auxiliary_pointer->next_entity;
+        }
+        return NOT_FOUND;
+    }
+}
+
+int search_column(char entity_name_insert[MAX], element_instance *element_pointer)
+{
+	if(element_list_pointer == NULL)
+    {
+        return NOT_FOUND;
+    }
+    else
+    {
+        if ((strcmp(entity_name_insert, element_pointer->entity_name) == 0)
+        	|| (strcmp(entity_name_insert, element_pointer->element_name) == 0))
+        {
+            return FOUND;
+        }
+        return NOT_FOUND;
+    }
+}
+
 char **write_array_type(int dimension, int i, char type_array[][MAX])
 {
     char** type_out =(char**)malloc(dimension*sizeof(char*));
@@ -200,7 +250,7 @@ char **write_array_type(int dimension, int i, char type_array[][MAX])
 	return type_out;
 }
 
-void write_java_file(element_instance *list_pointer, int dimension)
+void write_java_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX])
 {
 	FILE *file_out;
 	char name_array[dimension][MAX];
@@ -218,9 +268,17 @@ void write_java_file(element_instance *list_pointer, int dimension)
 	auxiliary_pointer = list_pointer;
 	for(i = 0; auxiliary_pointer != NULL; i++)
 	{
-		strcpy(name_array[i], auxiliary_pointer->element_name);
-		strcpy(type_array[i], auxiliary_pointer->element_type);
-		real_dimension++;
+		int validate_column = search_column(entity_name_validate, auxiliary_pointer);
+		if(validate_column == FOUND)
+		{
+			strcpy(name_array[i], auxiliary_pointer->element_name);
+			strcpy(type_array[i], auxiliary_pointer->element_type);
+			real_dimension++;
+		}
+
+		else{
+			printf("ERROR! Element does not belong in entity %s.", entity_name_validate);
+		}
 
 		if(auxiliary_pointer->next_element == NULL)
 		{

@@ -91,10 +91,10 @@ int main(int argc, char** argv)
   yyparse();
   
   printf("Elements found...\n");
+  create_entity_list(element_list_pointer);
   elements_number = print_element_list(element_list_pointer);
   printf("\n");
 
-  create_entity_list(element_list_pointer);
   
   printf("Entities found... \n");
   print_entity_list(entity_list_pointer);
@@ -107,7 +107,15 @@ int main(int argc, char** argv)
 
   for(i = 0; auxiliary_pointer != NULL; i++)
   {
-    write_java_file(auxiliary_pointer->element, elements_number);
+    int validade_entity = search_entity(auxiliary_pointer->entity_name);
+    if (validade_entity == 1)
+    {
+      write_java_file(auxiliary_pointer->element, elements_number, auxiliary_pointer->entity_name);
+    }
+    else
+    {
+      printf("Entidade Não Existente\n");
+    }
     auxiliary_pointer = auxiliary_pointer->next_entity;
   }
 

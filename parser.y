@@ -14,7 +14,8 @@
   char * strval;
 }
 
-%token T_CREATE
+%token T_CREATE 
+%token T_IGNORE T_NOT_NULL
 %token T_TABLE
 %token T_STRING
 %token T_INT
@@ -47,10 +48,17 @@ Type_specifier:
   | T_FLOAT
 ;
 
-Create_column:
-  D_STRING Type_specifier Finish_create_table {insert_element(element_list_pointer, $1, COLUMN, $2);}
-  | D_STRING Type_specifier ',' Create_column {insert_element(element_list_pointer, $1, COLUMN, $2);}
+Type_constraint:
+
+  | T_NOT_NULL Type_constraint  
+  | T_IGNORE Type_constraint
 ;
+
+Create_column:
+  D_STRING Type_specifier Type_constraint Finish_create_table {insert_element(element_list_pointer, $1, COLUMN, $2);}
+  | D_STRING Type_specifier Type_constraint ',' Create_column {insert_element(element_list_pointer, $1, COLUMN, $2);}
+;
+
 
 Input:
   

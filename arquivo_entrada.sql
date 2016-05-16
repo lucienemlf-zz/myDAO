@@ -1,9 +1,5 @@
 CREATE TABLE pessoa (
-nome INT,
+nome INT NOT NULL CHECK,
 cpf VARCHAR,
-fone INT);
-
-CREATE TABLE carro (
-placa VARCHAR,
-montadora VARCHAR,
-chassi INT);
+fone INT
+);

@@ -47,13 +47,15 @@ extern int yydebug;
   {
     T_CREATE = 258,
     T_TABLE = 259,
-    T_STRING = 260,
-    T_INT = 261,
-    T_VARCHAR = 262,
-    T_FLOAT = 263,
-    D_STRING = 264,
-    D_INTEGER = 265,
-    D_FLOAT = 266
+    T_SELECT = 260,
+    T_FROM = 261,
+    T_STRING = 262,
+    T_INT = 263,
+    T_VARCHAR = 264,
+    T_FLOAT = 265,
+    D_STRING = 266,
+    D_INTEGER = 267,
+    D_FLOAT = 268
   };
 #endif
 
@@ -62,11 +64,11 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 13 "parser.y" /* yacc.c:1909  */
+#line 12 "parser.y" /* yacc.c:1909  */
 
   char * strval;
 
-#line 70 "parser.tab.h" /* yacc.c:1909  */
+#line 72 "parser.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

@@ -5,7 +5,7 @@
 
 /* Definições */
 
-STRING [a-zA-Z][a-z0-9]*
+STRING ([a-zA-Z][a-z0-9]*)|\*
 WHITESPACE [ \n\r\t]+
 FLOAT [0-9]+\.[0-9]+
 INTEGER [0-9]+
@@ -23,6 +23,8 @@ ANY_CHAR .
 "VARCHAR" { yylval.strval = strdup(yytext); return T_VARCHAR; }
 "INT" {yylval.strval = strdup(yytext); return T_INT; }
 "FLOAT" { yylval.strval = strdup(yytext); return T_FLOAT; }
+"SELECT" { return T_SELECT;}
+"FROM" { return T_FROM;}
 [\(\)\{\}:;=,] {return yytext[0];}
 
 {IGNORE} {return T_IGNORE;}

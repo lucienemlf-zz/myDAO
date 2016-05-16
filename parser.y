@@ -3,7 +3,6 @@
 	#include <stdio.h>
   #include <stdlib.h>
   #include "symbol_table.h"
-  int columns = 0;
   FILE *yyin;
 %}
 
@@ -17,6 +16,8 @@
 %token T_CREATE 
 %token T_IGNORE T_NOT_NULL
 %token T_TABLE
+%token T_SELECT
+%token T_FROM
 %token T_STRING
 %token T_INT
 %token T_VARCHAR
@@ -40,6 +41,12 @@ Start_create_table:
 
 Finish_create_table:
   ')' ';' 
+  | ')' ';' Create_select_query
+;
+
+Create_select_query:
+  T_SELECT D_STRING T_FROM D_STRING ';' {insert_select(select_list_pointer, $2, $4);}
+  | T_SELECT D_STRING T_FROM D_STRING ';' Create_select_query {insert_select(select_list_pointer, $2, $4);}
 ;
 
 Type_specifier:
@@ -86,7 +93,10 @@ int main(int argc, char** argv)
   element_list_pointer = initialize_element_list(element_pointer);
 
   entity_instance *entity_pointer;
-  entity_list_pointer = initialize_entity_list(entity_pointer);  
+  entity_list_pointer = initialize_entity_list(entity_pointer);
+
+  select_instance *select_pointer;
+  select_list_pointer = initialize_select_list(select_pointer);
 
   FILE *entry_file = fopen("arquivo_entrada.sql", "r");
 
@@ -100,16 +110,38 @@ int main(int argc, char** argv)
   yyparse();
   
   printf("Elements found...\n");
+  create_entity_list(element_list_pointer);
   elements_number = print_element_list(element_list_pointer);
   printf("\n");
 
-  create_entity_list(element_list_pointer);
   
   printf("Entities found... \n");
   print_entity_list(entity_list_pointer);
   printf("\n");
 
-  write_java_file(element_list_pointer, elements_number);
+  printf("Selects found... \n");
+  print_select_list(select_list_pointer);
+  printf("\n");
+
+  int i;
+
+  entity_instance *auxiliary_pointer;
+  auxiliary_pointer = entity_list_pointer->next_entity;
+
+  for(i = 0; auxiliary_pointer != NULL; i++)
+  {
+    int validade_entity = search_entity(auxiliary_pointer->entity_name);
+    if (validade_entity == 1)
+    {
+      write_java_file(auxiliary_pointer->element, elements_number, auxiliary_pointer->entity_name);
+    }
+    else
+    {
+      printf("Entidade Não Existente\n");
+    }
+    auxiliary_pointer = auxiliary_pointer->next_entity;
+  }
+
   write_java_DAO_file(element_list_pointer, elements_number);
 
   fclose(entry_file);

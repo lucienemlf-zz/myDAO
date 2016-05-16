@@ -31,33 +31,53 @@ struct entity
   struct entity *next_entity;
 };
 
+struct select
+{
+	char selection_fields[MAX];
+	char entity_name[MAX];
+	struct select *next_select;
+};
+
 //Structures
 typedef struct element element_instance;
 typedef struct entity entity_instance;
+typedef struct select select_instance;
 
 //Pointers
 element_instance *element_list_pointer;
 entity_instance *entity_list_pointer;
+select_instance *select_list_pointer;
 
 // Inicialização das listas
-element_instance *initialize_element_list(element_instance *list_pointer){
+element_instance *initialize_element_list(element_instance *list_pointer)
+{
   list_pointer = (element_instance*) malloc (sizeof(element_instance));
   list_pointer->next_element = NULL;
   return list_pointer;
 }
 
-entity_instance *initialize_entity_list(entity_instance *list_pointer){
+entity_instance *initialize_entity_list(entity_instance *list_pointer)
+{
   list_pointer = (entity_instance*) malloc (sizeof(entity_instance));
   list_pointer->next_entity = NULL;
   return list_pointer;
 }
 
+select_instance *initialize_select_list(select_instance *list_pointer)
+{
+	list_pointer = (select_instance*) malloc (sizeof(select_instance));
+	list_pointer->next_select = NULL;
+	return list_pointer;
+}
+
 // Declaração das funções da tabela de simbolos
 void insert_element(element_instance *list_pointer, char element_name_insert[MAX], int element_scope_insert, char element_type_insert[MAX]);
 void insert_entity(entity_instance *list_pointer, element_instance *element_insert);
+void insert_select(select_instance *list_pointer, char selection_fields[MAX], char entity_name[MAX]);
 void create_entity_list(element_instance *list_pointer);
 int print_element_list(element_instance *list_pointer);
 void print_entity_list(entity_instance *list_pointer);
+void print_select_list(select_instance *list_pointer);
 
 // Declaração das funcões relacionadas a geração de código
 char *write_file_name(char name_array[][MAX], char type);
@@ -90,6 +110,17 @@ void insert_entity(entity_instance *list_pointer, element_instance *element_inse
   first_entity = list_pointer->next_entity;
   list_pointer->next_entity = new_entity;
   new_entity->next_entity = first_entity;
+}
+
+void insert_select(select_instance *list_pointer, char selection_fields[MAX], char entity_name[MAX])
+{
+	select_instance *new_select, *first_select;
+	new_select = (select_instance*) malloc(sizeof(select_instance));
+	strcpy(new_select->selection_fields, selection_fields);
+	strcpy(new_select->entity_name, entity_name);
+	first_select = list_pointer->next_select;
+	list_pointer->next_select = new_select;
+	new_select->next_select = first_select;
 }
 
 void create_entity_list(element_instance *list_pointer)
@@ -159,6 +190,23 @@ void print_entity_list(entity_instance *list_pointer)
 	{		
     	printf("%s\n",auxiliary_pointer->entity_name);
 		auxiliary_pointer = auxiliary_pointer->next_entity;
+	}
+}
+
+void print_select_list(select_instance *list_pointer)
+{
+	if(list_pointer == NULL)
+	{ 
+		printf("There is no select.\n");
+		exit(1);
+	}
+
+	select_instance *auxiliary_pointer;
+	auxiliary_pointer = list_pointer->next_select;
+	while(auxiliary_pointer != NULL)
+	{		
+    	printf("Select %s from %s.\n",auxiliary_pointer->selection_fields, auxiliary_pointer->entity_name);
+		auxiliary_pointer = auxiliary_pointer->next_select;
 	}
 }
 

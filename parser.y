@@ -44,8 +44,8 @@ Finish_create_table:
 ;
 
 Create_select_query:
-  T_SELECT D_STRING T_FROM D_STRING ';'
-  | T_SELECT '*' T_FROM D_STRING ';'
+  T_SELECT D_STRING T_FROM D_STRING ';' {insert_select(select_list_pointer, $2, $4);}
+  | T_SELECT D_STRING T_FROM D_STRING ';' Create_select_query {insert_select(select_list_pointer, $2, $4);}
 ;
 
 Type_specifier:
@@ -85,7 +85,10 @@ int main(int argc, char** argv)
   element_list_pointer = initialize_element_list(element_pointer);
 
   entity_instance *entity_pointer;
-  entity_list_pointer = initialize_entity_list(entity_pointer);  
+  entity_list_pointer = initialize_entity_list(entity_pointer);
+
+  select_instance *select_pointer;
+  select_list_pointer = initialize_select_list(select_pointer);
 
   FILE *entry_file = fopen("arquivo_entrada.sql", "r");
 
@@ -106,6 +109,10 @@ int main(int argc, char** argv)
   
   printf("Entities found... \n");
   print_entity_list(entity_list_pointer);
+  printf("\n");
+
+  printf("Selects found... \n");
+  print_select_list(select_list_pointer);
   printf("\n");
 
   int i;

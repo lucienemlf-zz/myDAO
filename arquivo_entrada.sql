@@ -7,3 +7,5 @@ CREATE TABLE carro (
 placa VARCHAR,
 montadora VARCHAR,
 chassi INT);
+
+SELECT * FROM carro;

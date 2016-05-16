@@ -15,6 +15,8 @@
 
 %token T_CREATE
 %token T_TABLE
+%token T_SELECT
+%token T_FROM
 %token T_STRING
 %token T_INT
 %token T_VARCHAR
@@ -38,6 +40,12 @@ Start_create_table:
 
 Finish_create_table:
   ')' ';' 
+  | ')' ';' Create_select_query
+;
+
+Create_select_query:
+  T_SELECT D_STRING T_FROM D_STRING ';'
+  | T_SELECT '*' T_FROM D_STRING ';'
 ;
 
 Type_specifier:

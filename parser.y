@@ -145,7 +145,7 @@ int main(int argc, char** argv)
   entity_instance *auxiliary_pointer_dao;
   auxiliary_pointer_dao = entity_list_pointer->next_entity;
 
-  for(i = 0; auxiliary_pointer != NULL; i++)
+  for(i = 0; auxiliary_pointer_dao != NULL; i++)
   {
     int validade_entity = search_entity(auxiliary_pointer_dao->entity_name);
     if (validade_entity == 1)

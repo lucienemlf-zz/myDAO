@@ -46,16 +46,18 @@ extern int yydebug;
   enum yytokentype
   {
     T_CREATE = 258,
-    T_TABLE = 259,
-    T_SELECT = 260,
-    T_FROM = 261,
-    T_STRING = 262,
-    T_INT = 263,
-    T_VARCHAR = 264,
-    T_FLOAT = 265,
-    D_STRING = 266,
-    D_INTEGER = 267,
-    D_FLOAT = 268
+    T_IGNORE = 259,
+    T_NOT_NULL = 260,
+    T_TABLE = 261,
+    T_SELECT = 262,
+    T_FROM = 263,
+    T_STRING = 264,
+    T_INT = 265,
+    T_VARCHAR = 266,
+    T_FLOAT = 267,
+    D_STRING = 268,
+    D_INTEGER = 269,
+    D_FLOAT = 270
   };
 #endif
 
@@ -68,7 +70,7 @@ union YYSTYPE
 
   char * strval;
 
-#line 72 "parser.tab.h" /* yacc.c:1909  */
+#line 74 "parser.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

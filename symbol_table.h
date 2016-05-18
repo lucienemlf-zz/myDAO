@@ -204,8 +204,16 @@ void print_select_list(select_instance *list_pointer)
 	select_instance *auxiliary_pointer;
 	auxiliary_pointer = list_pointer->next_select;
 	while(auxiliary_pointer != NULL)
-	{		
-    	printf("Select %s from %s.\n",auxiliary_pointer->selection_fields, auxiliary_pointer->entity_name);
+	{	
+    int validade_select = search_entity(auxiliary_pointer->entity_name);	
+    if(validade_select == FOUND)
+    {    
+      printf("Select %s from %s.\n",auxiliary_pointer->selection_fields, auxiliary_pointer->entity_name);
+    }
+    else
+    {
+      printf("Select query doesnt have a valid entity.\n");
+    }
 		auxiliary_pointer = auxiliary_pointer->next_select;
 	}
 }

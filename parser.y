@@ -142,7 +142,22 @@ int main(int argc, char** argv)
     auxiliary_pointer = auxiliary_pointer->next_entity;
   }
 
-  write_java_DAO_file(element_list_pointer, elements_number);
+  entity_instance *auxiliary_pointer_dao;
+  auxiliary_pointer_dao = entity_list_pointer->next_entity;
+
+  for(i = 0; auxiliary_pointer != NULL; i++)
+  {
+    int validade_entity = search_entity(auxiliary_pointer_dao->entity_name);
+    if (validade_entity == 1)
+    {
+      write_java_DAO_file(auxiliary_pointer_dao->element, elements_number, auxiliary_pointer_dao->entity_name);
+    }
+    else
+    {
+      printf("Entidade Não Existente\n");
+    }
+    auxiliary_pointer_dao = auxiliary_pointer_dao->next_entity;
+  }
 
   fclose(entry_file);
  

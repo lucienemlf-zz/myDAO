@@ -87,7 +87,7 @@ void mount_method_update(FILE *file_out);
 void mount_method_delete(FILE *file_out);
 void mount_method_select(FILE *file_out);
 void write_java_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX]);
-void write_java_DAO_file(element_instance *list_pointer, int dimension);
+void write_java_DAO_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX]);
 
 void insert_element(element_instance *list_pointer, char element_name_insert[MAX], int element_scope_insert, char element_type_insert[MAX])
 {
@@ -489,13 +489,50 @@ void mount_method_select(FILE *file_out)
 		
 }
 
-void write_java_DAO_file(element_instance *list_pointer, int dimension)
+void write_java_DAO_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX])
 {
+  char name_array[dimension][MAX];
+	char name_upcase[dimension][MAX];
+	char type_array[dimension][MAX];
+	int i, real_dimension = 0;
+
+	if(list_pointer == NULL)
+	{
+		printf("There is no instance.\n");
+		exit(1);
+	}
+
+	element_instance *auxiliary_pointer;
+	auxiliary_pointer = list_pointer;
+	for(i = 0; auxiliary_pointer != NULL; i++)
+	{
+		int validate_column = search_column(entity_name_validate, auxiliary_pointer);
+		if(validate_column == FOUND)
+		{
+			strcpy(name_array[i], auxiliary_pointer->element_name);
+			strcpy(type_array[i], auxiliary_pointer->element_type);
+			real_dimension++;
+		}
+
+		else{
+			printf("ERROR! Element does not belong in entity %s.", entity_name_validate);
+		}
+
+		if(auxiliary_pointer->next_element == NULL)
+		{
+			break;
+		}
+		else if(auxiliary_pointer->next_element->element_scope == 0)
+		{
+			break;
+		}
+
+		auxiliary_pointer = auxiliary_pointer->next_element;
+	}
 
 	FILE *file_out;
 	char *file_out_name; 
-char name_array[dimension][MAX];  // Apagar quando refatorar
-strcpy(name_array[0], "pessoa");
+  
 	file_out_name = write_file_name(name_array, 'd');
 
 	printf("Writing java insertDAO file...\n");

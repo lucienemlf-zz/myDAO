@@ -4,4 +4,4 @@ main: scanner.l
 	gcc lex.yy.c parser.tab.c -o myDAO 
 
 clean:
-	rm lex.* myDAO 
+	rm lex.* myDAO *.java

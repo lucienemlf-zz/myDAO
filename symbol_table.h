@@ -10,6 +10,9 @@
 #define COLUMN 1
 #define ENTITY 0
 
+#define PRIMARY_KEY 2
+#define NO_PRIMARY_KEY 3
+
 #define FOUND 1
 #define NOT_FOUND 0
 
@@ -166,7 +169,7 @@ int print_element_list(element_instance *list_pointer)
     	printf("%s\t",auxiliary_pointer->element_name);
 		printf("%d\t",auxiliary_pointer->element_scope);
 		printf("%s\t",auxiliary_pointer->element_type);
-		if(auxiliary_pointer->element_scope == 1)
+		if(auxiliary_pointer->element_scope != 0)
 		{
 			printf("%s\t",auxiliary_pointer->entity_name);
 		}
@@ -532,6 +535,7 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
   	char name_array[dimension][MAX];
 	char name_upcase[dimension][MAX];
 	char type_array[dimension][MAX];
+	char primary_key[MAX];
 	int i, real_dimension = 0;
 
 	char primary_key[MAX] = "cpf";
@@ -549,12 +553,22 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 		int validate_column = search_column(entity_name_validate, auxiliary_pointer);
 		if(validate_column == FOUND)
 		{
-			strcpy(name_array[i], auxiliary_pointer->element_name);
-			strcpy(type_array[i], auxiliary_pointer->element_type);
+
+			if(auxiliary_pointer->element_scope == PRIMARY_KEY)
+			{
+				strcpy(primary_key, auxiliary_pointer->element_name);
+			}
+			else
+			{
+				strcpy(name_array[i], auxiliary_pointer->element_name);
+				strcpy(type_array[i], auxiliary_pointer->element_type);
+
+			}
+
 			real_dimension++;
 		}
-
-		else{
+		else
+		{
 			printf("ERROR! Element does not belong in entity %s.", entity_name_validate);
 		}
 
@@ -570,6 +584,7 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 		auxiliary_pointer = auxiliary_pointer->next_element;
 	}
 
+	printf("primary_key %s\n", primary_key);
 	FILE *file_out;
 	char *file_out_name; 
   

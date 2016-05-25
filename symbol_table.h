@@ -169,7 +169,7 @@ int print_element_list(element_instance *list_pointer)
     	printf("%s\t",auxiliary_pointer->element_name);
 		printf("%d\t",auxiliary_pointer->element_scope);
 		printf("%s\t",auxiliary_pointer->element_type);
-		if(auxiliary_pointer->element_scope != 0)
+		if(auxiliary_pointer->element_scope == 1)
 		{
 			printf("%s\t",auxiliary_pointer->entity_name);
 		}
@@ -537,8 +537,6 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 	char type_array[dimension][MAX];
 	char primary_key[MAX];
 	int i, real_dimension = 0;
-
-	char primary_key[MAX] = "cpf";
 
 	if(list_pointer == NULL)
 	{

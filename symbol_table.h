@@ -359,9 +359,12 @@ void write_java_file(element_instance *list_pointer, int dimension, char entity_
 	char *file_out_name; 
 	file_out_name = write_file_name(name_array, 'm');
 
+	char folder_name[MAX];
+	strcpy(folder_name, "Model/");
+	strcat(folder_name,file_out_name);
 
 	printf("Writing java file for entity %s...\n",name_array[0]);
-	file_out = fopen(file_out_name, "w");
+	file_out = fopen(folder_name, "w");
 
 	if(!file_out)
 	{
@@ -588,8 +591,12 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
   
 	file_out_name = write_file_name(name_array, 'd');
 
+	char folder_name[MAX];
+	strcpy(folder_name, "DAO/");
+	strcat(folder_name,file_out_name);
+
 	printf("Writing java %sDAO file...\n", name_array[0]);
-	file_out = fopen(file_out_name, "w");
+	file_out = fopen(folder_name, "w");
 
 	if(!file_out)
 	{

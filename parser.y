@@ -123,6 +123,10 @@ int main(int argc, char** argv)
   print_select_list(select_list_pointer);
   printf("\n");
 
+  printf("Creating folders...\n");
+  int code_returned_folder_model = system("mkdir Model");
+  int code_returned_folder_dao = system("mkdir DAO");
+
   int i;
 
   entity_instance *auxiliary_pointer;

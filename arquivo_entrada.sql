@@ -11,7 +11,4 @@ chassi INT,
 PRIMARY KEY (chassi));
 
 
-SELECT * FROM carro;
-SELECT nome FROM pessoa;
-SELECT * FROM montadora;
 

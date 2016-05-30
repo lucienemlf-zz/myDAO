@@ -18,6 +18,7 @@
 %token T_TABLE
 %token T_SELECT
 %token T_FROM
+%token T_PRIMARY_KEY
 %token T_STRING
 %token T_INT
 %token T_VARCHAR
@@ -40,8 +41,8 @@ Start_create_table:
 ;
 
 Finish_create_table:
-  ')' ';' 
-  | ')' ';' Create_select_query
+  T_PRIMARY_KEY '(' D_STRING ')'')' ';' {insert_element(element_list_pointer, $3, PRIMARY_KEY, "PRIMARY_KEY");} 
+  | T_PRIMARY_KEY '(' D_STRING ')'')' ';' Create_select_query {insert_element(element_list_pointer, $3, PRIMARY_KEY, "PRIMARY_KEY");}
 ;
 
 Create_select_query:
@@ -61,8 +62,10 @@ Type_constraint:
   | T_IGNORE Type_constraint
 ;
 
+
+
 Create_column:
-  D_STRING Type_specifier Type_constraint Finish_create_table {insert_element(element_list_pointer, $1, COLUMN, $2);}
+  D_STRING Type_specifier Type_constraint ',' Finish_create_table {insert_element(element_list_pointer, $1, COLUMN, $2);}
   | D_STRING Type_specifier Type_constraint ',' Create_column {insert_element(element_list_pointer, $1, COLUMN, $2);}
 ;
 

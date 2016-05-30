@@ -88,7 +88,7 @@ char **write_array_type(int dimension, int i, char type_array[][MAX]);
 void mount_method_insert(FILE *file_out);
 void mount_method_update(FILE *file_out, char name_array[][MAX], char type_array[][MAX], int real_dimension, char primary_key[MAX]);
 void mount_method_delete(FILE *file_out);
-void mount_method_select(FILE *file_out, char name_array[][MAX], int real_dimension, char primary_key[MAX]);
+void mount_method_select(FILE *file_out, char name_array[][MAX], char type_array[][MAX], int real_dimension, char primary_key[MAX]);
 void write_java_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX]);
 void write_java_DAO_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX]);
 void capitalize_name(char capitalized_name[MAX]);	
@@ -514,7 +514,7 @@ void mount_method_delete(FILE *file_out)
 }
 
 
-void mount_method_select(FILE *file_out, char name_array[][MAX], int real_dimension, char primary_key[MAX])
+void mount_method_select(FILE *file_out, char name_array[][MAX], char type_array[][MAX], int real_dimension, char primary_key[MAX])
 {	
 	char entity_name_pascalcase[MAX];
 	strcpy(entity_name_pascalcase, name_array[0]);
@@ -523,11 +523,28 @@ void mount_method_select(FILE *file_out, char name_array[][MAX], int real_dimens
 	char capital_primary_key[MAX];
 	strcpy(capital_primary_key, primary_key);
 	capitalize_name(capital_primary_key);
+
+	int k = 0;
+	char **type_out;
+	type_out = write_array_type(real_dimension, k, type_array);
+
+	char type_primary_key[MAX];
+
+	for(k = 0; k < real_dimension; k++){
+		if(strcmp(name_array[k],primary_key) == 0){
+			strcpy(type_primary_key, type_out[k]);
+		}
+	}
+
+	char capital_type_primary_key[MAX];
+	strcpy(capital_type_primary_key, type_primary_key);
+	capitalize_name(capital_type_primary_key);
 	//Escrevendo carcaça do método INSERT
-	fprintf(file_out, "	public %s selecionar(%s %s) {\n",entity_name_pascalcase, entity_name_pascalcase, name_array[0]);
-	fprintf(file_out, "\t\tString sql = 'SELECT * FROM %s';\n", entity_name_pascalcase);
+	fprintf(file_out, "	public %s selecionar(%s %s) {\n",entity_name_pascalcase, type_primary_key, primary_key);
+	fprintf(file_out, "\t\tString sql = 'SELECT * FROM %s WHERE %s = ?';\n", entity_name_pascalcase, primary_key);
 	fprintf(file_out, "\t\t%s %s = new %s();\n", entity_name_pascalcase, name_array[0], entity_name_pascalcase);
-	fprintf(file_out, "\t\tStatement statement = conn.createStatement();\n");
+	fprintf(file_out, "\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
+	fprintf(file_out, "\t\tstatement.set%s(1, %s);\n", capital_type_primary_key, primary_key);
 	fprintf(file_out, "\t\tResultSet result = statement.executeQuery(sql);\n");
 	//Vai ser um for
 	fprintf(file_out, "\t\twhile (result.next()) {\n");
@@ -628,7 +645,7 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 	mount_method_insert(file_out);
 	fprintf(file_out, "\n\n");
 
-	mount_method_select(file_out, name_array, real_dimension, primary_key);
+	mount_method_select(file_out, name_array, type_array, real_dimension, primary_key);
 	fprintf(file_out, "\n\n");
 
 	mount_method_update(file_out, name_array, type_array, real_dimension, primary_key);

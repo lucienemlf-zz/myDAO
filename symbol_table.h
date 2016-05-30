@@ -86,8 +86,8 @@ void print_select_list(select_instance *list_pointer);
 char *write_file_name(char name_array[][MAX], char type);
 char **write_array_type(int dimension, int i, char type_array[][MAX]);
 void mount_method_insert(FILE *file_out);
-void mount_method_update(FILE *file_out, char name_array[][MAX], char type_array[][MAX], int real_dimension, char primary_key[MAX]);
-void mount_method_delete(FILE *file_out);
+void mount_method_update(FILE *file_out, char name_array[][MAX], int real_dimension, char primary_key[MAX]);
+void mount_method_delete(FILE *file_out, char name_array[][MAX], char primary_key[MAX]);
 void mount_method_select(FILE *file_out, char name_array[][MAX], int real_dimension, char primary_key[MAX]);
 void write_java_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX]);
 void write_java_DAO_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX]);
@@ -449,7 +449,7 @@ void mount_method_insert(FILE *file_out)
 
 }
 
-void mount_method_update(FILE *file_out, char name_array[][MAX], char type_array[][MAX], int real_dimension, char primary_key[MAX])
+void mount_method_update(FILE *file_out, char name_array[][MAX], int real_dimension, char primary_key[MAX])
 {	
 	char entity_name_pascalcase[MAX];
 	strcpy(entity_name_pascalcase, name_array[0]);
@@ -459,8 +459,8 @@ void mount_method_update(FILE *file_out, char name_array[][MAX], char type_array
 	strcpy(capital_primary_key, primary_key);
 	capitalize_name(capital_primary_key);
 	int i = 0;
-	//Escrevendo carcaça do método update
-	fprintf(file_out, "	public void atualizar (%s %s) {\n", entity_name_pascalcase, name_array[0]);
+	
+	fprintf(file_out, "	public void atualizar(%s %s) {\n", entity_name_pascalcase, name_array[0]);
 	fprintf(file_out, "\t\t\tString sql = 'UPDATE %s SET' +\n", name_array[0]);
 	
 	for(i = 1; i<real_dimension; i++)
@@ -495,15 +495,24 @@ void mount_method_update(FILE *file_out, char name_array[][MAX], char type_array
 		
 }
 
-void mount_method_delete(FILE *file_out)
+void mount_method_delete(FILE *file_out, char name_array[][MAX], char primary_key[MAX])
 {	
-	
-	//Escrevendo carcaça do método excluir
-	fprintf(file_out, "	public void excluir(User user) {\n");
-	fprintf(file_out, "\t\t\tString sql = 'DELETE FROM User WHERE username=?';\n");//Vai ser um for
+	char entity_name_pascalcase[MAX];
+	strcpy(entity_name_pascalcase, name_array[0]);
+	capitalize_name(entity_name_pascalcase);
+
+	char capital_primary_key[MAX];
+	strcpy(capital_primary_key, primary_key);
+	capitalize_name(capital_primary_key);
+
+	fprintf(file_out, "	public void excluir(%s %s) {\n", entity_name_pascalcase, name_array[0]);
+	fprintf(file_out, "\t\t\tString sql = 'DELETE FROM %s WHERE %s=?';\n", name_array[0], primary_key);
 	fprintf(file_out, "\t\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
 	
-	fprintf(file_out, "\t\t\tstatement.setString(1, user);\n");
+	char capital_column_name[MAX];
+	strcpy(capital_column_name, primary_key);
+	capitalize_name(capital_column_name);
+	fprintf(file_out, "\t\t\tstatement.setString(1, %s.get%s());\n", name_array[0], capital_column_name);
 	
 	fprintf(file_out, "\t\t\tint rowsInserted = statement.executeUpdate();\n");
 	fprintf(file_out, "\t\t\tif (rowsInserted > 0) {\n");
@@ -512,7 +521,6 @@ void mount_method_delete(FILE *file_out)
 	fprintf(file_out, "\t\t}");
 		
 }
-
 
 void mount_method_select(FILE *file_out, char name_array[][MAX], int real_dimension, char primary_key[MAX])
 {	
@@ -631,10 +639,10 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 	mount_method_select(file_out, name_array, real_dimension, primary_key);
 	fprintf(file_out, "\n\n");
 
-	mount_method_update(file_out, name_array, type_array, real_dimension, primary_key);
+	mount_method_update(file_out, name_array, real_dimension, primary_key);
 	fprintf(file_out, "\n\n");
 
-	mount_method_delete(file_out);
+	mount_method_delete(file_out, name_array, primary_key);
 
 	fprintf(file_out, "\n}");
 

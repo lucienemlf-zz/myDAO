@@ -88,7 +88,7 @@ char **write_array_type(int dimension, int i, char type_array[][MAX]);
 void mount_method_insert(FILE *file_out);
 void mount_method_update(FILE *file_out, char name_array[][MAX], char type_array[][MAX], int real_dimension, char primary_key[MAX]);
 void mount_method_delete(FILE *file_out);
-void mount_method_select(FILE *file_out);
+void mount_method_select(FILE *file_out, char name_array[][MAX], int real_dimension, char primary_key[MAX]);
 void write_java_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX]);
 void write_java_DAO_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX]);
 void capitalize_name(char capitalized_name[MAX]);	
@@ -514,24 +514,35 @@ void mount_method_delete(FILE *file_out)
 }
 
 
-void mount_method_select(FILE *file_out)
+void mount_method_select(FILE *file_out, char name_array[][MAX], int real_dimension, char primary_key[MAX])
 {	
+	char entity_name_pascalcase[MAX];
+	strcpy(entity_name_pascalcase, name_array[0]);
+	capitalize_name(entity_name_pascalcase);
 
+	char capital_primary_key[MAX];
+	strcpy(capital_primary_key, primary_key);
+	capitalize_name(capital_primary_key);
 	//Escrevendo carcaça do método INSERT
-	fprintf(file_out, "	public void selecionar(s s) {\n");
-	fprintf(file_out, "\t\tString sql = 'SELECT * FROM Users';\n");
+	fprintf(file_out, "	public %s selecionar(%s %s) {\n",entity_name_pascalcase, entity_name_pascalcase, name_array[0]);
+	fprintf(file_out, "\t\tString sql = 'SELECT * FROM %s';\n", entity_name_pascalcase);
+	fprintf(file_out, "\t\t%s %s = new %s();\n", entity_name_pascalcase, name_array[0], entity_name_pascalcase);
 	fprintf(file_out, "\t\tStatement statement = conn.createStatement();\n");
 	fprintf(file_out, "\t\tResultSet result = statement.executeQuery(sql);\n");
-	fprintf(file_out, "\t\tint count = 0;\n");
-
-		//Vai ser um for
-		fprintf(file_out, "\t\twhile (result.next()) {\n");
-		fprintf(file_out, "\t\t\tString name = result.getString(2);\n");
-		fprintf(file_out, "\t\t\tString fullname = result.getString('fullname');\n");
-		fprintf(file_out, "\t\t}\n");
+	//Vai ser um for
+	fprintf(file_out, "\t\twhile (result.next()) {\n");
+	int i = 0,j = 1;
+	for(i = 1; i<real_dimension; i++)
+	{
+		char capital_column_name[MAX];
+		strcpy(capital_column_name, name_array[i]);
+		capitalize_name(capital_column_name);
+		fprintf(file_out, "\t\t\t%s.set%s(result.getString(%d));\n", name_array[0], capital_column_name, i);
+		j++;
+	}
+	fprintf(file_out, "\t\t}\n");
+	fprintf(file_out, "\t\treturn %s;\n", name_array[0]);
 	
-	fprintf(file_out, "\t\tString output = 'User #Teste: Teste1 - Teste2';\n");
-	fprintf(file_out, "\t\tSystem.out.println(String.format(output, ++count, name, fullname));\n");
 	fprintf(file_out, "\t}");
 		
 }
@@ -617,7 +628,7 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 	mount_method_insert(file_out);
 	fprintf(file_out, "\n\n");
 
-	mount_method_select(file_out);
+	mount_method_select(file_out, name_array, real_dimension, primary_key);
 	fprintf(file_out, "\n\n");
 
 	mount_method_update(file_out, name_array, type_array, real_dimension, primary_key);

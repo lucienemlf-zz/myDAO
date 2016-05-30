@@ -331,9 +331,12 @@ void write_java_file(element_instance *list_pointer, int dimension, char entity_
 		int validate_column = search_column(entity_name_validate, auxiliary_pointer);
 		if(validate_column == FOUND)
 		{
-			strcpy(name_array[i], auxiliary_pointer->element_name);
-			strcpy(type_array[i], auxiliary_pointer->element_type);
-			real_dimension++;
+			if(auxiliary_pointer->element_scope != PRIMARY_KEY){
+			
+				strcpy(name_array[i], auxiliary_pointer->element_name);
+				strcpy(type_array[i], auxiliary_pointer->element_type);
+				real_dimension++;
+			}
 		}
 
 		else{
@@ -563,10 +566,10 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 			{
 				strcpy(name_array[i], auxiliary_pointer->element_name);
 				strcpy(type_array[i], auxiliary_pointer->element_type);
+				real_dimension++;
 
 			}
 
-			real_dimension++;
 		}
 		else
 		{

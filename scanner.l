@@ -25,7 +25,6 @@ ANY_CHAR .
 "FLOAT" { yylval.strval = strdup(yytext); return T_FLOAT; }
 "SELECT" { return T_SELECT;}
 "FROM" { return T_FROM;}
-"PRIMARY KEY" { return T_PRIMARY_KEY;}
 [\(\)\{\}:;=,] {return yytext[0];}
 
 {IGNORE} {return T_IGNORE;}

@@ -85,7 +85,7 @@ void print_select_list(select_instance *list_pointer);
 // Declaração das funcões relacionadas a geração de código
 char *write_file_name(char name_array[][MAX], char type);
 char **write_array_type(int dimension, int i, char type_array[][MAX]);
-void mount_method_insert(FILE *file_out);
+void mount_method_insert(FILE *file_out, char name_array[][MAX],  char type_array[][MAX],int real_dimension, char primary_key[MAX]);
 void mount_method_update(FILE *file_out, char name_array[][MAX], char type_array[][MAX], int real_dimension, char primary_key[MAX]);
 void mount_method_delete(FILE *file_out);
 void mount_method_select(FILE *file_out);
@@ -332,7 +332,7 @@ void write_java_file(element_instance *list_pointer, int dimension, char entity_
 		if(validate_column == FOUND)
 		{
 			if(auxiliary_pointer->element_scope != PRIMARY_KEY){
-			
+
 				strcpy(name_array[i], auxiliary_pointer->element_name);
 				strcpy(type_array[i], auxiliary_pointer->element_type);
 				real_dimension++;
@@ -430,17 +430,81 @@ void capitalize_name(char capitalized_name[MAX])
 	capitalized_name[0] = toupper(capitalized_name[0]);
 }
 
-void mount_method_insert(FILE *file_out)
+void mount_method_insert(FILE *file_out, char name_array[][MAX],  char type_array[][MAX],int real_dimension, char primary_key[MAX])
 {	
+	// Capitalizing names
+	char capital_entity_name[MAX];
+	strcpy(capital_entity_name, name_array[0]);
+	capitalize_name(capital_entity_name);
+
+	char capital_primary_key[MAX];
+	strcpy(capital_primary_key, primary_key);
+	capitalize_name(capital_primary_key);
 	
 	//Escrevendo carcaça do método INSERT
-	fprintf(file_out, "	public void inserir(s s) {\n");
-	fprintf(file_out, "\t\t\tString sql = 'INSERT INTO s (s, s) VALUE (?, ?)';\n");//Vai ser um for
+	fprintf(file_out, "	public void inserir(%s %s) {\n", capital_entity_name, name_array[0]);
+	fprintf(file_out, "\t\t\tString sql = 'INSERT INTO %s (", name_array[0]);
+
+	// fprintf(file_out, "\t\t\tString sql = 'INSERT INTO %s (s, s) VALUE (?, ?)';\n", name_array[0]);
+
+	int i = 0; 
+	for (i = 1; i < real_dimension; ++i)
+	{
+		if (i != (real_dimension - 1))
+		{
+			fprintf(file_out, "%s, ", name_array[i]);	
+		}
+		else
+		{
+			fprintf(file_out, "%s)", name_array[i]);	
+		}
+		
+	}
+
+	fprintf(file_out, " VALUE (");
+
+	int j = 0;
+	for (j = 1; j < real_dimension; ++j)
+	{
+		
+		if(j != (real_dimension - 1))
+		{
+			fprintf(file_out, "?, ", name_array[j]);	
+		}
+		else
+		{
+			fprintf(file_out, "?)';\n", name_array[j]);	
+		}
+		
+	}
+
 	fprintf(file_out, "\t\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
-	//Vai ser um for
-		fprintf(file_out, "\t\t\tstatement.setString(1, 'Teste 1');\n");
-		fprintf(file_out, "\t\t\tstatement.setString(2, 'Teste 2');\n");
 	
+	// Setting values to statement
+	int l = 1;
+	for(l = 1; l<real_dimension; l++)
+	{
+			char capital_column_name[MAX];
+			strcpy(capital_column_name, name_array[l]);
+			capitalize_name(capital_column_name);
+
+			if(strcmp(type_array[l], "INT") == 0)
+			{
+
+				fprintf(file_out, "\t\t\tstatement.setInt(%d, %s.get%s());\n", l, name_array[0], capital_column_name);
+			}
+			else if(strcmp(type_array[j], "FLOAT") == 0)
+			{
+
+				fprintf(file_out, "\t\t\tstatement.setFloat(%d, %s.get%s());\n", l, name_array[0], capital_column_name);
+			}
+			else{
+
+				fprintf(file_out, "\t\t\tstatement.setString(%d, %s.get%s());\n", l, name_array[0], capital_column_name);
+			}
+
+	}
+
 	fprintf(file_out, "\t\t\tint rowsInserted = statement.executeUpdate();\n");
 	fprintf(file_out, "\t\t\tif (rowsInserted > 0) {\n");
 	fprintf(file_out, "\t\t\t\tSystem.out.println('A new user was inserted successfully!');\n");
@@ -614,7 +678,7 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 	fprintf(file_out, "public class %sDAO {\n", entity_name_pascalcase);
 	fprintf(file_out, "\n");
 
-	mount_method_insert(file_out);
+	mount_method_insert(file_out, name_array, type_array, real_dimension, primary_key);
 	fprintf(file_out, "\n\n");
 
 	mount_method_select(file_out);

@@ -228,6 +228,8 @@ char *write_file_name(char name_array[][MAX], char type)
 	static char file_out_name[MAX], source_string[MAX];
 	strcpy(file_out_name, name_array[0]);
 
+	capitalize_name(file_out_name);
+
 	if(type == 'm'){
 		strcpy(source_string, ".java");
 	}else{
@@ -367,7 +369,11 @@ void write_java_file(element_instance *list_pointer, int dimension, char entity_
 	strcpy(folder_name, "Model/");
 	strcat(folder_name,file_out_name);
 
-	printf("Writing java file for entity %s...\n",name_array[0]);
+	char entity_name_pascalcase[MAX];
+	strcpy(entity_name_pascalcase, name_array[0]);
+	capitalize_name(entity_name_pascalcase);
+
+	printf("Writing java file for entity %s...\n",entity_name_pascalcase);
 	file_out = fopen(folder_name, "w");
 
 	if(!file_out)
@@ -375,10 +381,6 @@ void write_java_file(element_instance *list_pointer, int dimension, char entity_
 		printf("I can't open java file called %s.\n", file_out_name);
 		exit(1);
 	}
-
-	char entity_name_pascalcase[MAX];
-	strcpy(entity_name_pascalcase, name_array[0]);
-	capitalize_name(entity_name_pascalcase);
 
 	fprintf(file_out, "public class %s {\n", entity_name_pascalcase);
 	fprintf(file_out, "\n");
@@ -420,15 +422,19 @@ void write_java_file(element_instance *list_pointer, int dimension, char entity_
 	//Fechando classe
 	fprintf(file_out, "}");
 
-	printf("Writing java file for entity %s completed.\n",name_array[0]);
+	printf("Writing java file for entity %s completed.\n",entity_name_pascalcase);
 
 	fclose(file_out);
 }
 
 void capitalize_name(char capitalized_name[MAX])
 {
-	int i = 0;
 	capitalized_name[0] = toupper(capitalized_name[0]);
+}
+
+void uncapitalize_name(char uncapitalized_name[MAX])
+{
+	uncapitalized_name[0] = tolower(uncapitalized_name[0]);
 }
 
 void mount_method_insert(FILE *file_out, char name_array[][MAX],  char type_array[][MAX],int real_dimension, char primary_key[MAX])
@@ -438,12 +444,16 @@ void mount_method_insert(FILE *file_out, char name_array[][MAX],  char type_arra
 	strcpy(capital_entity_name, name_array[0]);
 	capitalize_name(capital_entity_name);
 
+	char lowercase_entity_name[MAX];
+	strcpy(lowercase_entity_name, name_array[0]);
+	uncapitalize_name(lowercase_entity_name);
+
 	char capital_primary_key[MAX];
 	strcpy(capital_primary_key, primary_key);
 	capitalize_name(capital_primary_key);
-	
+
 	//Escrevendo carcaça do método INSERT
-	fprintf(file_out, "	public void inserir(%s %s) {\n", capital_entity_name, name_array[0]);
+	fprintf(file_out, "	public void insert(%s %s) {\n", capital_entity_name, lowercase_entity_name);
 	fprintf(file_out, "\t\t\tString sql = 'INSERT INTO %s (", name_array[0]);
 
 	// fprintf(file_out, "\t\t\tString sql = 'INSERT INTO %s (s, s) VALUE (?, ?)';\n", name_array[0]);
@@ -492,23 +502,23 @@ void mount_method_insert(FILE *file_out, char name_array[][MAX],  char type_arra
 			if(strcmp(type_array[l], "INT") == 0)
 			{
 
-				fprintf(file_out, "\t\t\tstatement.setInt(%d, %s.get%s());\n", l, name_array[0], capital_column_name);
+				fprintf(file_out, "\t\t\tstatement.setInt(%d, %s.get%s());\n", l, lowercase_entity_name, capital_column_name);
 			}
 			else if(strcmp(type_array[j], "FLOAT") == 0)
 			{
 
-				fprintf(file_out, "\t\t\tstatement.setFloat(%d, %s.get%s());\n", l, name_array[0], capital_column_name);
+				fprintf(file_out, "\t\t\tstatement.setFloat(%d, %s.get%s());\n", l, lowercase_entity_name, capital_column_name);
 			}
 			else{
 
-				fprintf(file_out, "\t\t\tstatement.setString(%d, %s.get%s());\n", l, name_array[0], capital_column_name);
+				fprintf(file_out, "\t\t\tstatement.setString(%d, %s.get%s());\n", l, lowercase_entity_name, capital_column_name);
 			}
 
 	}
 
 	fprintf(file_out, "\t\t\tint rowsInserted = statement.executeUpdate();\n");
 	fprintf(file_out, "\t\t\tif (rowsInserted > 0) {\n");
-	fprintf(file_out, "\t\t\t\tSystem.out.println('A new user was inserted successfully!');\n");
+	fprintf(file_out, "\t\t\t\tSystem.out.println('A new %s was inserted successfully!');\n", lowercase_entity_name);
 	fprintf(file_out, "\t\t\t}\n");
 	fprintf(file_out, "\t\t}");
 
@@ -519,6 +529,10 @@ void mount_method_update(FILE *file_out, char name_array[][MAX], char type_array
 	char entity_name_pascalcase[MAX];
 	strcpy(entity_name_pascalcase, name_array[0]);
 	capitalize_name(entity_name_pascalcase);
+
+	char lowercase_entity_name[MAX];
+	strcpy(lowercase_entity_name, name_array[0]);
+	uncapitalize_name(lowercase_entity_name);
 
 	char capital_primary_key[MAX];
 	strcpy(capital_primary_key, primary_key);
@@ -541,7 +555,7 @@ void mount_method_update(FILE *file_out, char name_array[][MAX], char type_array
 	strcpy(capital_type_primary_key, type_primary_key);
 	capitalize_name(capital_type_primary_key);
 
-	fprintf(file_out, "	public void atualizar(%s %s) {\n", entity_name_pascalcase, name_array[0]);
+	fprintf(file_out, "	public void update(%s %s) {\n", entity_name_pascalcase, lowercase_entity_name);
 	fprintf(file_out, "\t\t\tString sql = 'UPDATE %s SET' +\n", name_array[0]);
 	
 	for(i = 1; i<real_dimension; i++)
@@ -568,14 +582,14 @@ void mount_method_update(FILE *file_out, char name_array[][MAX], char type_array
 			strcpy(capital_type_column, type_out[i]);
 			capitalize_name(capital_type_column);
 
-			fprintf(file_out, "\t\t\tstatement.set%s(%d, %s.get%s());\n", capital_type_column, j, name_array[0], capital_column_name);
+			fprintf(file_out, "\t\t\tstatement.set%s(%d, %s.get%s());\n", capital_type_column, j, lowercase_entity_name, capital_column_name);
 			j++;
 		}
 	}
-	fprintf(file_out, "\t\t\tstatement.set%s(%d, %s.get%s());\n", capital_type_primary_key, real_dimension-1, name_array[0], capital_primary_key);
+	fprintf(file_out, "\t\t\tstatement.set%s(%d, %s.get%s());\n", capital_type_primary_key, real_dimension-1, lowercase_entity_name, capital_primary_key);
 	fprintf(file_out, "\t\t\tint rowsInserted = statement.executeUpdate();\n");
 	fprintf(file_out, "\t\t\tif (rowsInserted > 0) {\n");
-	fprintf(file_out, "\t\t\t\tSystem.out.println('An existing user was updated successfully!');\n");
+	fprintf(file_out, "\t\t\t\tSystem.out.println('An existing %s was updated successfully!');\n", lowercase_entity_name);
 	fprintf(file_out, "\t\t\t}\n");
 	fprintf(file_out, "\t\t}");
 		
@@ -586,6 +600,10 @@ void mount_method_delete(FILE *file_out, char name_array[][MAX], char type_array
 	char entity_name_pascalcase[MAX];
 	strcpy(entity_name_pascalcase, name_array[0]);
 	capitalize_name(entity_name_pascalcase);
+
+	char lowercase_entity_name[MAX];
+	strcpy(lowercase_entity_name, name_array[0]);
+	uncapitalize_name(lowercase_entity_name);
 
 	char capital_primary_key[MAX];
 	strcpy(capital_primary_key, primary_key);
@@ -607,18 +625,18 @@ void mount_method_delete(FILE *file_out, char name_array[][MAX], char type_array
 	strcpy(capital_type_primary_key, type_primary_key);
 	capitalize_name(capital_type_primary_key);
 
-	fprintf(file_out, "	public void excluir(%s %s) {\n", entity_name_pascalcase, name_array[0]);
+	fprintf(file_out, "	public void delete(%s %s) {\n", entity_name_pascalcase, lowercase_entity_name);
 	fprintf(file_out, "\t\t\tString sql = 'DELETE FROM %s WHERE %s=?';\n", name_array[0], primary_key);
 	fprintf(file_out, "\t\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
 	
 	char capital_column_name[MAX];
 	strcpy(capital_column_name, primary_key);
 	capitalize_name(capital_column_name);
-	fprintf(file_out, "\t\t\tstatement.set%s(1, %s.get%s());\n", capital_type_primary_key, name_array[0], capital_column_name);
+	fprintf(file_out, "\t\t\tstatement.set%s(1, %s.get%s());\n", capital_type_primary_key, lowercase_entity_name, capital_column_name);
 	
 	fprintf(file_out, "\t\t\tint rowsInserted = statement.executeUpdate();\n");
 	fprintf(file_out, "\t\t\tif (rowsInserted > 0) {\n");
-	fprintf(file_out, "\t\t\t\tSystem.out.println('An existing user was deleted successfully!');\n");
+	fprintf(file_out, "\t\t\t\tSystem.out.println('An existing %s was deleted successfully!');\n", lowercase_entity_name);
 	fprintf(file_out, "\t\t\t}\n");
 	fprintf(file_out, "\t\t}");
 		
@@ -629,6 +647,10 @@ void mount_method_select(FILE *file_out, char name_array[][MAX], char type_array
 	char entity_name_pascalcase[MAX];
 	strcpy(entity_name_pascalcase, name_array[0]);
 	capitalize_name(entity_name_pascalcase);
+
+	char lowercase_entity_name[MAX];
+	strcpy(lowercase_entity_name, name_array[0]);
+	uncapitalize_name(lowercase_entity_name);
 
 	char capital_primary_key[MAX];
 	strcpy(capital_primary_key, primary_key);
@@ -650,9 +672,9 @@ void mount_method_select(FILE *file_out, char name_array[][MAX], char type_array
 	strcpy(capital_type_primary_key, type_primary_key);
 	capitalize_name(capital_type_primary_key);
 	//Escrevendo carcaça do método INSERT
-	fprintf(file_out, "	public %s selecionar(%s %s) {\n",entity_name_pascalcase, type_primary_key, primary_key);
+	fprintf(file_out, "	public %s select(%s %s) {\n",entity_name_pascalcase, type_primary_key, primary_key);
 	fprintf(file_out, "\t\tString sql = 'SELECT * FROM %s WHERE %s = ?';\n", entity_name_pascalcase, primary_key);
-	fprintf(file_out, "\t\t%s %s = new %s();\n", entity_name_pascalcase, name_array[0], entity_name_pascalcase);
+	fprintf(file_out, "\t\t%s %s = new %s();\n", entity_name_pascalcase, lowercase_entity_name, entity_name_pascalcase);
 	fprintf(file_out, "\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
 	fprintf(file_out, "\t\tstatement.set%s(1, %s);\n", capital_type_primary_key, primary_key);
 	fprintf(file_out, "\t\tResultSet result = statement.executeQuery(sql);\n");
@@ -669,11 +691,11 @@ void mount_method_select(FILE *file_out, char name_array[][MAX], char type_array
 		strcpy(capital_type_column, type_out[i]);
 		capitalize_name(capital_type_column);
 
-		fprintf(file_out, "\t\t\t%s.set%s(result.get%s(%d));\n", name_array[0], capital_column_name, capital_type_column, i);
+		fprintf(file_out, "\t\t\t%s.set%s(result.get%s(%d));\n", lowercase_entity_name, capital_column_name, capital_type_column, i);
 		j++;
 	}
 	fprintf(file_out, "\t\t}\n");
-	fprintf(file_out, "\t\treturn %s;\n", name_array[0]);
+	fprintf(file_out, "\t\treturn %s;\n", lowercase_entity_name);
 	
 	fprintf(file_out, "\t}");
 		
@@ -684,6 +706,10 @@ void mount_method_select_all(FILE *file_out, char name_array[][MAX], char type_a
 	char entity_name_pascalcase[MAX];
 	strcpy(entity_name_pascalcase, name_array[0]);
 	capitalize_name(entity_name_pascalcase);
+
+	char lowercase_entity_name[MAX];
+	strcpy(lowercase_entity_name, name_array[0]);
+	uncapitalize_name(lowercase_entity_name);
 
 	char capital_primary_key[MAX];
 	strcpy(capital_primary_key, primary_key);
@@ -705,14 +731,14 @@ void mount_method_select_all(FILE *file_out, char name_array[][MAX], char type_a
 	strcpy(capital_type_primary_key, type_primary_key);
 	capitalize_name(capital_type_primary_key);
 	//Escrevendo carcaça do método INSERT
-	fprintf(file_out, "	public ArrayList<%s> selecionarTodos() {\n",entity_name_pascalcase);
+	fprintf(file_out, "	public ArrayList<%s> selectAll() {\n",entity_name_pascalcase);
 	fprintf(file_out, "\t\tString sql = 'SELECT * FROM %s';\n", entity_name_pascalcase);
-	fprintf(file_out, "\t\tArrayList<%s> %ss = new ArrayList<>();\n", entity_name_pascalcase, name_array[0]);
+	fprintf(file_out, "\t\tArrayList<%s> %ss = new ArrayList<>();\n", entity_name_pascalcase, lowercase_entity_name);
 	fprintf(file_out, "\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
 	fprintf(file_out, "\t\tResultSet result = statement.executeQuery(sql);\n");
 
 	fprintf(file_out, "\t\twhile (result.next()) {\n");
-	fprintf(file_out, "\t\t\t%s %s = new %s();\n", entity_name_pascalcase, name_array[0], entity_name_pascalcase);
+	fprintf(file_out, "\t\t\t%s %s = new %s();\n", entity_name_pascalcase, lowercase_entity_name, entity_name_pascalcase);
 
 	int i = 0,j = 1;
 	for(i = 1; i<real_dimension; i++)
@@ -725,14 +751,14 @@ void mount_method_select_all(FILE *file_out, char name_array[][MAX], char type_a
 		strcpy(capital_type_column, type_out[i]);
 		capitalize_name(capital_type_column);
 
-		fprintf(file_out, "\t\t\t%s.set%s(result.get%s(%d));\n", name_array[0], capital_column_name, capital_type_column, i);
+		fprintf(file_out, "\t\t\t%s.set%s(result.get%s(%d));\n", lowercase_entity_name, capital_column_name, capital_type_column, i);
 		j++;
 	}
-	fprintf(file_out, "\t\t\tif (%s != null) {\n", name_array[0]);
-	fprintf(file_out, "\t\t\t\t%ss.add(%s);\n", name_array[0], name_array[0]);
+	fprintf(file_out, "\t\t\tif (%s != null) {\n", lowercase_entity_name);
+	fprintf(file_out, "\t\t\t\t%ss.add(%s);\n", lowercase_entity_name, lowercase_entity_name);
 	fprintf(file_out, "\t\t\t}\n");
 	fprintf(file_out, "\t\t}\n");
-	fprintf(file_out, "\t\treturn %ss;\n", name_array[0]);
+	fprintf(file_out, "\t\treturn %ss;\n", lowercase_entity_name);
 	
 	fprintf(file_out, "\t}");
 		
@@ -790,7 +816,6 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 		auxiliary_pointer = auxiliary_pointer->next_element;
 	}
 
-	printf("primary_key %s\n", primary_key);
 	FILE *file_out;
 	char *file_out_name; 
   
@@ -800,7 +825,11 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 	strcpy(folder_name, "DAO/");
 	strcat(folder_name,file_out_name);
 
-	printf("Writing java %sDAO file...\n", name_array[0]);
+	char entity_name_pascalcase[MAX];
+	strcpy(entity_name_pascalcase, name_array[0]);
+	capitalize_name(entity_name_pascalcase);
+
+	printf("Writing java %sDAO file...\n", entity_name_pascalcase);
 	file_out = fopen(folder_name, "w");
 
 	if(!file_out)
@@ -808,10 +837,6 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 		printf("I can't open javaDAO file.\n");
 		exit(1);
 	}	
-
-	char entity_name_pascalcase[MAX];
-	strcpy(entity_name_pascalcase, name_array[0]);
-	capitalize_name(entity_name_pascalcase);
 
 	fprintf(file_out, "public class %sDAO {\n", entity_name_pascalcase);
 	fprintf(file_out, "\n");
@@ -831,6 +856,8 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 	mount_method_delete(file_out, name_array, type_array, real_dimension, primary_key);
 
 	fprintf(file_out, "\n}");
+
+	printf("Writing java %sDAO file completed.\n",entity_name_pascalcase);
 
 }
 

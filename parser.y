@@ -88,7 +88,7 @@ int yywrap(void)
   return 1;
 }
 
-int main(int argc, char** argv)
+int main(int argc, char *argv[])
 { 
   int elements_number;
 
@@ -101,10 +101,29 @@ int main(int argc, char** argv)
   select_instance *select_pointer;
   select_list_pointer = initialize_select_list(select_pointer);
 
-  FILE *entry_file = fopen("arquivo_entrada.sql", "r");
+  char *sql_file_name;
+
+  int i;
+  int strsize = 0;
+  for (i=1; i<argc; i++) {
+      strsize += strlen(argv[i]);
+      if (argc > i+1)
+          strsize++;
+  }
+
+  sql_file_name = malloc(strsize);
+  sql_file_name[0] = '\0';
+
+  for (i=1; i<argc; i++) {
+      strcat(sql_file_name, argv[i]);
+      if (argc > i+1)
+          strcat(sql_file_name, " ");
+  }
+
+  FILE *entry_file = fopen(sql_file_name, "r");
 
   if(!entry_file) {
-    printf("I can't open arquivo_entrada.sql.\n");
+    printf("Error opening %s.\n", sql_file_name);
     exit(1);
   }
 
@@ -117,7 +136,6 @@ int main(int argc, char** argv)
   elements_number = print_element_list(element_list_pointer);
   printf("\n");
 
-  
   printf("Entities found... \n");
   print_entity_list(entity_list_pointer);
   printf("\n");
@@ -129,8 +147,10 @@ int main(int argc, char** argv)
   printf("Creating folders...\n");
   int code_returned_folder_model = system("mkdir Model");
   int code_returned_folder_dao = system("mkdir DAO");
+  printf("Folders succesfully created.\n\n");
 
-  int i;
+  printf("Creating models files...\n");
+
 
   entity_instance *auxiliary_pointer;
   auxiliary_pointer = entity_list_pointer->next_entity;
@@ -144,10 +164,14 @@ int main(int argc, char** argv)
     }
     else
     {
-      printf("Entidade Não Existente\n");
+      printf("Entity does not exist.\n");
     }
     auxiliary_pointer = auxiliary_pointer->next_entity;
   }
+
+  printf("Models succesfully created.\n\n");
+
+  printf("Creating DAOs files...\n");
 
   entity_instance *auxiliary_pointer_dao;
   auxiliary_pointer_dao = entity_list_pointer->next_entity;
@@ -161,10 +185,12 @@ int main(int argc, char** argv)
     }
     else
     {
-      printf("Entidade Não Existente\n");
+      printf("Entity does not exist.\n");
     }
     auxiliary_pointer_dao = auxiliary_pointer_dao->next_entity;
   }
+
+  printf("DAOs succesfully created.\n");
 
   fclose(entry_file);
  

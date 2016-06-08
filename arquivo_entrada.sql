@@ -1,13 +1,13 @@
-CREATE TABLE pessoa (
-Nome INT NOT NULL CHECK,
+CREATE TABLE person (
+name INT NOT NULL CHECK,
 cpf VARCHAR,
-fone INT,
-PRIMARY KEY (rg)
+phone INT,
+PRIMARY KEY (cpf)
 );
 
-CREATE TABLE carro (
-placa VARCHAR,
-montadora VARCHAR,
+CREATE TABLE Car (
+plate VARCHAR,
+mounter VARCHAR,
 chassi INT,
 PRIMARY KEY (chassi)
 );

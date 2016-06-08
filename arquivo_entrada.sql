@@ -1,8 +1,8 @@
 CREATE TABLE pessoa (
-nome INT NOT NULL CHECK,
+Nome INT NOT NULL CHECK,
 cpf VARCHAR,
 fone INT,
-PRIMARY KEY (cpf)
+PRIMARY KEY (rg)
 );
 
 CREATE TABLE carro (
@@ -11,6 +11,8 @@ montadora VARCHAR,
 chassi INT,
 PRIMARY KEY (chassi)
 );
+
+SELECT * FROM pessoa;
 
 
 

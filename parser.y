@@ -110,6 +110,7 @@ int main(int argc, char** argv)
 
   yyin = entry_file;
 
+  // Montar tabela de simbolos
   yyparse();
   
   printf("Elements found...\n");
@@ -130,6 +131,12 @@ int main(int argc, char** argv)
   int code_returned_folder_model = system("mkdir Model");
   int code_returned_folder_dao = system("mkdir DAO");
 
+  
+  // parse
+
+  // Voltar o ponteiro de parse pro início do arquivo de entrada
+
+  // Faz as validações e cria os arquivos
   int i;
 
   entity_instance *auxiliary_pointer;

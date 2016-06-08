@@ -169,7 +169,7 @@ int print_element_list(element_instance *list_pointer)
     	printf("%s\t",auxiliary_pointer->element_name);
 		printf("%d\t",auxiliary_pointer->element_scope);
 		printf("%s\t",auxiliary_pointer->element_type);
-		if(auxiliary_pointer->element_scope == 1)
+		if(auxiliary_pointer->element_scope == COLUMN)
 		{
 			printf("%s\t",auxiliary_pointer->entity_name);
 		}
@@ -324,10 +324,65 @@ void write_java_file(element_instance *list_pointer, int dimension, char entity_
 		exit(1);
 	}
 
+
+	// Recuperando PK
+	element_instance *auxiliary_pk;
+	auxiliary_pk = list_pointer;
+	int m = 0;
+	char table_name[MAX];
+	char primary_key[MAX];
+	for (m = 0; auxiliary_pk != NULL; m++)
+	{
+
+		if(auxiliary_pk->element_scope == PRIMARY_KEY)
+		{
+			strcpy(primary_key, auxiliary_pk ->element_name);
+			strcpy(table_name, auxiliary_pk ->entity_name);
+		}
+
+		if((auxiliary_pk->next_element == NULL) || (auxiliary_pk->next_element->element_scope == 0))
+		{
+			break;
+		}
+
+		auxiliary_pk = auxiliary_pk->next_element;
+	}
+
+	// Validando PK
+	element_instance *auxiliary_pkey;
+	auxiliary_pkey = list_pointer;
+	int found = 0;
+	int n = 0;
+	for (n = 0; auxiliary_pkey != NULL; n++)
+	{
+		if(auxiliary_pkey->element_scope == COLUMN)
+		{
+			int validate_pk = search_column(primary_key, auxiliary_pkey);
+			if(validate_pk == FOUND)
+			{
+				found = 1;
+			}
+		}
+
+		if((auxiliary_pkey->next_element == NULL) || (auxiliary_pkey->next_element->element_scope == 0))
+		{
+			break;
+		}
+
+	 	auxiliary_pkey = auxiliary_pkey->next_element;
+	 }
+
+	 // Imprime mensagens de erro caso PK não exista na tabela
+	 if(found == 0){
+	 	printf("\nThis field: %s, does not exist on the table %s! Please check your sql file.\n", primary_key, table_name);
+		exit(1);
+	 }
+
 	element_instance *auxiliary_pointer;
 	auxiliary_pointer = list_pointer;
 	for(i = 0; auxiliary_pointer != NULL; i++)
 	{
+		// Validando se a coluna existe na entidade
 		int validate_column = search_column(entity_name_validate, auxiliary_pointer);
 		if(validate_column == FOUND)
 		{
@@ -528,8 +583,9 @@ void mount_method_update(FILE *file_out, char name_array[][MAX], char type_array
 	char **type_out;
 	type_out = write_array_type(real_dimension, k, type_array);
 
-	char type_primary_key[MAX];
 
+	// Refatorar método de buscar primary key
+	char type_primary_key[MAX];
 	for(k = 0; k < real_dimension; k++){
 		if(strcmp(name_array[k],primary_key) == 0){
 			strcpy(type_primary_key, type_out[k]);
@@ -694,7 +750,8 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 		int validate_column = search_column(entity_name_validate, auxiliary_pointer);
 		if(validate_column == FOUND)
 		{
-
+	
+			// Refatorar método pra saber se pk ou não
 			if(auxiliary_pointer->element_scope == PRIMARY_KEY)
 			{
 				strcpy(primary_key, auxiliary_pointer->element_name);
@@ -711,7 +768,7 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 		else
 		{
 			printf("ERROR! Element does not belong in entity %s.", entity_name_validate);
-		}
+		}	
 
 		if(auxiliary_pointer->next_element == NULL)
 		{

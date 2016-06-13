@@ -13,6 +13,3 @@ PRIMARY KEY (chassi)
 );
 
 SELECT * FROM pessoa;
-
-
-

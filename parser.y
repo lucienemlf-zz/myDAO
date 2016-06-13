@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
   // Voltar o ponteiro de parse pro início do arquivo de entrada
 
   // Faz as validações e cria os arquivos
-  int i;
+  //int i;
 
   entity_instance *auxiliary_pointer;
   auxiliary_pointer = entity_list_pointer->next_entity;

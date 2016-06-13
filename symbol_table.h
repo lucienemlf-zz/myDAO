@@ -508,7 +508,7 @@ void mount_method_insert(FILE *file_out, char name_array[][MAX],  char type_arra
 	capitalize_name(capital_primary_key);
 
 	//Escrevendo carcaça do método INSERT
-	fprintf(file_out, "	public void insert(%s %s) {\n", capital_entity_name, lowercase_entity_name);
+	fprintf(file_out, "	public void insert(%s %s) throws SQLException {\n", capital_entity_name, lowercase_entity_name);
 	fprintf(file_out, "\t\t\tString sql = 'INSERT INTO %s (", name_array[0]);
 
 	// fprintf(file_out, "\t\t\tString sql = 'INSERT INTO %s (s, s) VALUE (?, ?)';\n", name_array[0]);
@@ -611,7 +611,7 @@ void mount_method_update(FILE *file_out, char name_array[][MAX], char type_array
 	strcpy(capital_type_primary_key, type_primary_key);
 	capitalize_name(capital_type_primary_key);
 
-	fprintf(file_out, "	public void update(%s %s) {\n", entity_name_pascalcase, lowercase_entity_name);
+	fprintf(file_out, "	public void update(%s %s) throws SQLException {\n", entity_name_pascalcase, lowercase_entity_name);
 	fprintf(file_out, "\t\t\tString sql = 'UPDATE %s SET' +\n", name_array[0]);
 	
 	for(i = 1; i<real_dimension; i++)
@@ -681,7 +681,7 @@ void mount_method_delete(FILE *file_out, char name_array[][MAX], char type_array
 	strcpy(capital_type_primary_key, type_primary_key);
 	capitalize_name(capital_type_primary_key);
 
-	fprintf(file_out, "	public void delete(%s %s) {\n", entity_name_pascalcase, lowercase_entity_name);
+	fprintf(file_out, "	public void delete(%s %s) throws SQLException {\n", entity_name_pascalcase, lowercase_entity_name);
 	fprintf(file_out, "\t\t\tString sql = 'DELETE FROM %s WHERE %s=?';\n", name_array[0], primary_key);
 	fprintf(file_out, "\t\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
 	
@@ -728,7 +728,7 @@ void mount_method_select(FILE *file_out, char name_array[][MAX], char type_array
 	strcpy(capital_type_primary_key, type_primary_key);
 	capitalize_name(capital_type_primary_key);
 	//Escrevendo carcaça do método INSERT
-	fprintf(file_out, "	public %s select(%s %s) {\n",entity_name_pascalcase, type_primary_key, primary_key);
+	fprintf(file_out, "	public %s select(%s %s) throws SQLException {\n",entity_name_pascalcase, type_primary_key, primary_key);
 	fprintf(file_out, "\t\tString sql = 'SELECT * FROM %s WHERE %s = ?';\n", entity_name_pascalcase, primary_key);
 	fprintf(file_out, "\t\t%s %s = new %s();\n", entity_name_pascalcase, lowercase_entity_name, entity_name_pascalcase);
 	fprintf(file_out, "\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
@@ -787,7 +787,7 @@ void mount_method_select_all(FILE *file_out, char name_array[][MAX], char type_a
 	strcpy(capital_type_primary_key, type_primary_key);
 	capitalize_name(capital_type_primary_key);
 	//Escrevendo carcaça do método INSERT
-	fprintf(file_out, "	public ArrayList<%s> selectAll() {\n",entity_name_pascalcase);
+	fprintf(file_out, "	public ArrayList<%s> selectAll() throws SQLException {\n",entity_name_pascalcase);
 	fprintf(file_out, "\t\tString sql = 'SELECT * FROM %s';\n", entity_name_pascalcase);
 	fprintf(file_out, "\t\tArrayList<%s> %ss = new ArrayList<>();\n", entity_name_pascalcase, lowercase_entity_name);
 	fprintf(file_out, "\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
@@ -893,7 +893,13 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 	{
 		printf("I can't open javaDAO file.\n");
 		exit(1);
-	}	
+	}
+
+	// Escrita dos imports
+	fprintf(file_out, "import java.sql.PreparedStatement;\n");
+	fprintf(file_out, "import java.sql.ResultSet;\n");
+	fprintf(file_out, "import java.sql.SQLException;\n");
+	fprintf(file_out, "import java.util.ArrayList;\n\n");
 
 	fprintf(file_out, "public class %sDAO {\n", entity_name_pascalcase);
 	fprintf(file_out, "\n");

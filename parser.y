@@ -42,12 +42,16 @@ Start_create_table:
 
 Finish_create_table:
   T_PRIMARY_KEY '(' D_STRING ')'')' ';' {insert_element(element_list_pointer, $3, PRIMARY_KEY, "PRIMARY_KEY");} 
-  | T_PRIMARY_KEY '(' D_STRING ')'')' ';' Create_select_query {insert_element(element_list_pointer, $3, PRIMARY_KEY, "PRIMARY_KEY");}
+
 ;
 
 Create_select_query:
-  T_SELECT D_STRING T_FROM D_STRING ';' {insert_select(select_list_pointer, $2, $4);}
-  | T_SELECT D_STRING T_FROM D_STRING ';' Create_select_query {insert_select(select_list_pointer, $2, $4);}
+  T_SELECT Selection_fields T_FROM D_STRING ';' {printf("--------> %d\n", select_fields_counter);insert_select(select_list_pointer, select_fields_counter, $4);select_fields_counter = 0;}
+;
+
+Selection_fields:
+  D_STRING {insert_selected_fields(selected_fields_list_pointer,$1);select_fields_counter++;}
+  | D_STRING ',' Selection_fields {insert_selected_fields(selected_fields_list_pointer,$1);select_fields_counter++;}
 ;
 
 Type_specifier:
@@ -62,17 +66,15 @@ Type_constraint:
   | T_IGNORE Type_constraint
 ;
 
-
-
 Create_column:
   D_STRING Type_specifier Type_constraint ',' Finish_create_table {insert_element(element_list_pointer, $1, COLUMN, $2);}
   | D_STRING Type_specifier Type_constraint ',' Create_column {insert_element(element_list_pointer, $1, COLUMN, $2);}
 ;
 
-
 Input:
   
   | Input Start_create_table
+  | Input Create_select_query
 ;
   
 
@@ -100,6 +102,9 @@ int main(int argc, char *argv[])
 
   select_instance *select_pointer;
   select_list_pointer = initialize_select_list(select_pointer);
+
+  selected_fields_instance *selected_fields_pointer;
+  selected_fields_list_pointer = initialize_selected_fields_list(selected_fields_pointer);
 
   char *sql_file_name;
 
@@ -130,6 +135,7 @@ int main(int argc, char *argv[])
   yyin = entry_file;
 
   yyparse();
+
   
   printf("Elements found...\n");
   create_entity_list(element_list_pointer);
@@ -142,6 +148,10 @@ int main(int argc, char *argv[])
 
   printf("Selects found... \n");
   print_select_list(select_list_pointer);
+  printf("\n");
+
+  printf("Selected fields found... \n");
+  print_selected_fields_list(selected_fields_list_pointer);
   printf("\n");
 
   printf("Creating folders...\n");

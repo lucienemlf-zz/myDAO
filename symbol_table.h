@@ -16,6 +16,9 @@
 #define FOUND 1
 #define NOT_FOUND 0
 
+#define VALID 1
+#define INVALID 0
+
 int select_fields_counter = 0;
 
 //Structure for Columns
@@ -40,6 +43,7 @@ struct select
 {
 	int selection_fields;
 	char entity_name[MAX];
+	int validity;
 	struct select *next_select;
 };
 
@@ -143,6 +147,7 @@ void insert_select(select_instance *list_pointer, int selection_fields, char ent
 	select_instance *new_select, *first_select;
 	new_select = (select_instance*) malloc(sizeof(select_instance));
 	new_select->selection_fields = selection_fields;
+	new_select->validity = VALID;
 	strcpy(new_select->entity_name, entity_name);
 	first_select = list_pointer->next_select;
 	list_pointer->next_select = new_select;
@@ -240,19 +245,21 @@ void print_select_list(select_instance *list_pointer)
 
 	select_instance *auxiliary_pointer;
 	auxiliary_pointer = list_pointer->next_select;
-	while(auxiliary_pointer != NULL)
+	while(list_pointer->next_select != NULL)
 	{	
-    int validade_select = search_entity(auxiliary_pointer->entity_name);	
-    if(validade_select == FOUND)
-    {    
-      printf("Select %d from %s.\n",auxiliary_pointer->selection_fields, auxiliary_pointer->entity_name);
-    }
-    else
-    {
-      printf("Select query doesnt have a valid entity.\n");
-    }
-		auxiliary_pointer = auxiliary_pointer->next_select;
+	    int validade_select = search_entity(list_pointer->next_select->entity_name);	
+	    if(validade_select == FOUND)
+	    {    
+	      	printf("Select %d from %s.\n",list_pointer->next_select->selection_fields, list_pointer->next_select->entity_name);
+	    }
+	    else
+	   	{
+	   		list_pointer->next_select->validity = INVALID;
+	    	printf("Select query doesnt have a valid entity.\n");
+	    }
+		list_pointer->next_select = list_pointer->next_select->next_select;
 	}
+	list_pointer->next_select = auxiliary_pointer;
 }
 
 void print_selected_fields_list(selected_fields_instance *list_pointer)

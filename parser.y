@@ -134,6 +134,7 @@ int main(int argc, char *argv[])
 
   yyin = entry_file;
 
+  // Montar tabela de simbolos
   yyparse();
 
   
@@ -160,7 +161,13 @@ int main(int argc, char *argv[])
   printf("Folders succesfully created.\n\n");
 
   printf("Creating models files...\n");
+  
+  // parse
 
+  // Voltar o ponteiro de parse pro início do arquivo de entrada
+
+  // Faz as validações e cria os arquivos
+  //int i;
 
   entity_instance *auxiliary_pointer;
   auxiliary_pointer = entity_list_pointer->next_entity;

@@ -202,7 +202,7 @@ int print_element_list(element_instance *list_pointer)
     	printf("%s\t",auxiliary_pointer->element_name);
 		printf("%d\t",auxiliary_pointer->element_scope);
 		printf("%s\t",auxiliary_pointer->element_type);
-		if(auxiliary_pointer->element_scope == 1)
+		if(auxiliary_pointer->element_scope == COLUMN)
 		{
 			printf("%s\t",auxiliary_pointer->entity_name);
 		}
@@ -376,10 +376,65 @@ void write_java_file(element_instance *list_pointer, int dimension, char entity_
 		exit(1);
 	}
 
+
+	// Recuperando PK
+	element_instance *auxiliary_pk;
+	auxiliary_pk = list_pointer;
+	int m = 0;
+	char table_name[MAX];
+	char primary_key[MAX];
+	for (m = 0; auxiliary_pk != NULL; m++)
+	{
+
+		if(auxiliary_pk->element_scope == PRIMARY_KEY)
+		{
+			strcpy(primary_key, auxiliary_pk ->element_name);
+			strcpy(table_name, auxiliary_pk ->entity_name);
+		}
+
+		if((auxiliary_pk->next_element == NULL) || (auxiliary_pk->next_element->element_scope == 0))
+		{
+			break;
+		}
+
+		auxiliary_pk = auxiliary_pk->next_element;
+	}
+
+	// Validando PK
+	element_instance *auxiliary_pkey;
+	auxiliary_pkey = list_pointer;
+	int found = 0;
+	int n = 0;
+	for (n = 0; auxiliary_pkey != NULL; n++)
+	{
+		if(auxiliary_pkey->element_scope == COLUMN)
+		{
+			int validate_pk = search_column(primary_key, auxiliary_pkey);
+			if(validate_pk == FOUND)
+			{
+				found = 1;
+			}
+		}
+
+		if((auxiliary_pkey->next_element == NULL) || (auxiliary_pkey->next_element->element_scope == 0))
+		{
+			break;
+		}
+
+	 	auxiliary_pkey = auxiliary_pkey->next_element;
+	 }
+
+	 // Imprime mensagens de erro caso PK não exista na tabela
+	 if(found == 0){
+	 	printf("\nThis field: %s, does not exist on the table %s! Please check your sql file.\n", primary_key, table_name);
+		exit(1);
+	 }
+
 	element_instance *auxiliary_pointer;
 	auxiliary_pointer = list_pointer;
 	for(i = 0; auxiliary_pointer != NULL; i++)
 	{
+		// Validando se a coluna existe na entidade
 		int validate_column = search_column(entity_name_validate, auxiliary_pointer);
 		if(validate_column == FOUND)
 		{
@@ -502,7 +557,7 @@ void mount_method_insert(FILE *file_out, char name_array[][MAX],  char type_arra
 	capitalize_name(capital_primary_key);
 
 	//Escrevendo carcaça do método INSERT
-	fprintf(file_out, "	public void insert(%s %s) {\n", capital_entity_name, lowercase_entity_name);
+	fprintf(file_out, "	public void insert(%s %s) throws SQLException {\n", capital_entity_name, lowercase_entity_name);
 	fprintf(file_out, "\t\t\tString sql = 'INSERT INTO %s (", name_array[0]);
 
 	// fprintf(file_out, "\t\t\tString sql = 'INSERT INTO %s (s, s) VALUE (?, ?)';\n", name_array[0]);
@@ -592,8 +647,9 @@ void mount_method_update(FILE *file_out, char name_array[][MAX], char type_array
 	char **type_out;
 	type_out = write_array_type(real_dimension, k, type_array);
 
-	char type_primary_key[MAX];
 
+	// Refatorar método de buscar primary key
+	char type_primary_key[MAX];
 	for(k = 0; k < real_dimension; k++){
 		if(strcmp(name_array[k],primary_key) == 0){
 			strcpy(type_primary_key, type_out[k]);
@@ -604,7 +660,7 @@ void mount_method_update(FILE *file_out, char name_array[][MAX], char type_array
 	strcpy(capital_type_primary_key, type_primary_key);
 	capitalize_name(capital_type_primary_key);
 
-	fprintf(file_out, "	public void update(%s %s) {\n", entity_name_pascalcase, lowercase_entity_name);
+	fprintf(file_out, "	public void update(%s %s) throws SQLException {\n", entity_name_pascalcase, lowercase_entity_name);
 	fprintf(file_out, "\t\t\tString sql = 'UPDATE %s SET' +\n", name_array[0]);
 	
 	for(i = 1; i<real_dimension; i++)
@@ -674,7 +730,7 @@ void mount_method_delete(FILE *file_out, char name_array[][MAX], char type_array
 	strcpy(capital_type_primary_key, type_primary_key);
 	capitalize_name(capital_type_primary_key);
 
-	fprintf(file_out, "	public void delete(%s %s) {\n", entity_name_pascalcase, lowercase_entity_name);
+	fprintf(file_out, "	public void delete(%s %s) throws SQLException {\n", entity_name_pascalcase, lowercase_entity_name);
 	fprintf(file_out, "\t\t\tString sql = 'DELETE FROM %s WHERE %s=?';\n", name_array[0], primary_key);
 	fprintf(file_out, "\t\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
 	
@@ -721,7 +777,7 @@ void mount_method_select(FILE *file_out, char name_array[][MAX], char type_array
 	strcpy(capital_type_primary_key, type_primary_key);
 	capitalize_name(capital_type_primary_key);
 	//Escrevendo carcaça do método INSERT
-	fprintf(file_out, "	public %s select(%s %s) {\n",entity_name_pascalcase, type_primary_key, primary_key);
+	fprintf(file_out, "	public %s select(%s %s) throws SQLException {\n",entity_name_pascalcase, type_primary_key, primary_key);
 	fprintf(file_out, "\t\tString sql = 'SELECT * FROM %s WHERE %s = ?';\n", entity_name_pascalcase, primary_key);
 	fprintf(file_out, "\t\t%s %s = new %s();\n", entity_name_pascalcase, lowercase_entity_name, entity_name_pascalcase);
 	fprintf(file_out, "\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
@@ -780,7 +836,7 @@ void mount_method_select_all(FILE *file_out, char name_array[][MAX], char type_a
 	strcpy(capital_type_primary_key, type_primary_key);
 	capitalize_name(capital_type_primary_key);
 	//Escrevendo carcaça do método INSERT
-	fprintf(file_out, "	public ArrayList<%s> selectAll() {\n",entity_name_pascalcase);
+	fprintf(file_out, "	public ArrayList<%s> selectAll() throws SQLException {\n",entity_name_pascalcase);
 	fprintf(file_out, "\t\tString sql = 'SELECT * FROM %s';\n", entity_name_pascalcase);
 	fprintf(file_out, "\t\tArrayList<%s> %ss = new ArrayList<>();\n", entity_name_pascalcase, lowercase_entity_name);
 	fprintf(file_out, "\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
@@ -834,7 +890,8 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 		int validate_column = search_column(entity_name_validate, auxiliary_pointer);
 		if(validate_column == FOUND)
 		{
-
+	
+			// Refatorar método pra saber se pk ou não
 			if(auxiliary_pointer->element_scope == PRIMARY_KEY)
 			{
 				strcpy(primary_key, auxiliary_pointer->element_name);
@@ -851,7 +908,7 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 		else
 		{
 			printf("ERROR! Element does not belong in entity %s.", entity_name_validate);
-		}
+		}	
 
 		if(auxiliary_pointer->next_element == NULL)
 		{
@@ -885,7 +942,13 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 	{
 		printf("I can't open javaDAO file.\n");
 		exit(1);
-	}	
+	}
+
+	// Escrita dos imports
+	fprintf(file_out, "import java.sql.PreparedStatement;\n");
+	fprintf(file_out, "import java.sql.ResultSet;\n");
+	fprintf(file_out, "import java.sql.SQLException;\n");
+	fprintf(file_out, "import java.util.ArrayList;\n\n");
 
 	fprintf(file_out, "public class %sDAO {\n", entity_name_pascalcase);
 	fprintf(file_out, "\n");

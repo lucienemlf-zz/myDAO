@@ -15,3 +15,5 @@ PRIMARY KEY (chassi)
 SELECT name,cpf FROM person;
 
 SELECT mounter,chassi,blablabla FROM Car;
+
+SELECT * FROM pessoa;

@@ -103,12 +103,14 @@ void insert_select(select_instance *list_pointer, int selection_fields, char ent
 void insert_selected_fields(selected_fields_instance *list_pointer, char field_name[MAX]);
 void create_entity_list(element_instance *list_pointer);
 int print_element_list(element_instance *list_pointer);
+int is_pk(element_instance *list_pointer, char primary_key[MAX]);
 void print_entity_list(entity_instance *list_pointer);
 void print_select_list(select_instance *list_pointer);
 void print_selected_fields_list(selected_fields_instance *list_pointer);
 
 // Declaração das funcões relacionadas a geração de código
 char *write_file_name(char name_array[][MAX], char type);
+char *getPK(element_instance *list_pointer); 
 char **write_array_type(int dimension, int i, char type_array[][MAX]);
 void mount_method_insert(FILE *file_out, char name_array[][MAX],  char type_array[][MAX],int real_dimension, char primary_key[MAX]);
 void mount_method_select(FILE *file_out, char name_array[][MAX], char type_array[][MAX], int real_dimension, char primary_key[MAX]);
@@ -369,34 +371,20 @@ char **write_array_type(int dimension, int i, char type_array[][MAX])
 	return type_out;
 }
 
-void write_java_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX])
+// Recuperando PK
+char *getPK(element_instance *list_pointer) 
 {
-	FILE *file_out;
-	char name_array[dimension][MAX];
-	char name_upcase[dimension][MAX];
-	char type_array[dimension][MAX];
-	int i, real_dimension = 0;
 
-	if(list_pointer == NULL)
-	{
-		printf("There is no instance.\n");
-		exit(1);
-	}
-
-
-	// Recuperando PK
 	element_instance *auxiliary_pk;
 	auxiliary_pk = list_pointer;
 	int m = 0;
-	char table_name[MAX];
-	char primary_key[MAX];
+	static char primary_key[MAX];
 	for (m = 0; auxiliary_pk != NULL; m++)
 	{
 
 		if(auxiliary_pk->element_scope == PRIMARY_KEY)
 		{
 			strcpy(primary_key, auxiliary_pk ->element_name);
-			strcpy(table_name, auxiliary_pk ->entity_name);
 		}
 
 		if((auxiliary_pk->next_element == NULL) || (auxiliary_pk->next_element->element_scope == 0))
@@ -407,7 +395,13 @@ void write_java_file(element_instance *list_pointer, int dimension, char entity_
 		auxiliary_pk = auxiliary_pk->next_element;
 	}
 
-	// Validando PK
+	return primary_key;
+}
+
+// Validando PK	
+int is_pk(element_instance *list_pointer, char primary_key[MAX])
+{
+
 	element_instance *auxiliary_pkey;
 	auxiliary_pkey = list_pointer;
 	int found = 0;
@@ -431,9 +425,34 @@ void write_java_file(element_instance *list_pointer, int dimension, char entity_
 	 	auxiliary_pkey = auxiliary_pkey->next_element;
 	 }
 
+	 return found;
+}
+
+
+
+void write_java_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX])
+{
+	FILE *file_out;
+	char name_array[dimension][MAX];
+	char name_upcase[dimension][MAX];
+	char type_array[dimension][MAX];
+	int i, real_dimension = 0;
+
+	if(list_pointer == NULL)
+	{
+		printf("There is no instance.\n");
+		exit(1);
+	}
+
+	char *primary_key;
+	primary_key = getPK(list_pointer);
+
+
+	int found = is_pk(list_pointer, primary_key);
+
 	 // Imprime mensagens de erro caso PK não exista na tabela
 	 if(found == 0){
-	 	printf("\nThis field: %s, does not exist on the table %s! Please check your sql file.\n", primary_key, table_name);
+	 	printf("\nThis field: %s, does not exist! Please check your sql file.\n", primary_key);
 		exit(1);
 	 }
 

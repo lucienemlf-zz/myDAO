@@ -151,6 +151,9 @@ int main(int argc, char *argv[])
   print_select_list(select_list_pointer);
   printf("\n");
 
+  associate_select_selected_fields(selected_fields_list_pointer, select_list_pointer);
+  validate_selected_fields(selected_fields_list_pointer, element_list_pointer);
+
   printf("Selected fields found... \n");
   print_selected_fields_list(selected_fields_list_pointer);
   printf("\n");

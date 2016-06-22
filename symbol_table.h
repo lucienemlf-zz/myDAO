@@ -51,6 +51,7 @@ struct selected_fields
 {
 	char field_name[MAX];
 	struct select *select;
+	int validity;
 	struct selected_fields *next_selected_field;
 };
 
@@ -107,6 +108,8 @@ int is_pk(element_instance *list_pointer, char primary_key[MAX]);
 void print_entity_list(entity_instance *list_pointer);
 void print_select_list(select_instance *list_pointer);
 void print_selected_fields_list(selected_fields_instance *list_pointer);
+void associate_select_selected_fields(selected_fields_instance *selected_fields_list_pointer, select_instance *select_list_pointer);
+void validate_selected_fields(selected_fields_instance *selected_fields_list_pointer, element_instance *element_list_pointer);
 
 // Declaração das funcões relacionadas a geração de código
 char *write_file_name(char name_array[][MAX], char type);
@@ -162,6 +165,7 @@ void insert_selected_fields(selected_fields_instance *list_pointer,char field_na
 	new_selected_field = (selected_fields_instance*) malloc(sizeof(selected_fields_instance));
 	strcpy(new_selected_field->field_name, field_name);
 	new_selected_field->select = NULL;
+	new_selected_field->validity = INVALID;
 	first_selected_field = list_pointer->next_selected_field;
 	list_pointer->next_selected_field = new_selected_field;
 	new_selected_field->next_selected_field = first_selected_field;
@@ -276,9 +280,74 @@ void print_selected_fields_list(selected_fields_instance *list_pointer)
 	auxiliary_pointer = list_pointer->next_selected_field;
 	while(auxiliary_pointer != NULL)
 	{	
-    	printf("%s\n", auxiliary_pointer->field_name);
+		if(auxiliary_pointer->validity == VALID){
+    		printf("%s\t", auxiliary_pointer->field_name);
+    		printf("%s\n", auxiliary_pointer->select->entity_name);
+    	}
+    	else
+    	{
+    		printf("SELECT FIELD %s NOT VALID\n", auxiliary_pointer->field_name);
+    	}
 		auxiliary_pointer = auxiliary_pointer->next_selected_field;
 	}
+}
+
+void associate_select_selected_fields(selected_fields_instance *selected_fields_list_pointer, select_instance *select_list_pointer)
+{
+	select_instance *auxiliary_select_pointer;
+	auxiliary_select_pointer = select_list_pointer->next_select;
+	selected_fields_instance *auxiliary_selected_fields_pointer;
+	auxiliary_selected_fields_pointer = selected_fields_list_pointer->next_selected_field;
+	while(select_list_pointer->next_select != NULL)
+	{
+		int i;
+		for(i = 0; i < select_list_pointer->next_select->selection_fields; i++)
+		{
+			selected_fields_list_pointer->next_selected_field->select = select_list_pointer->next_select;
+			selected_fields_list_pointer->next_selected_field = selected_fields_list_pointer->next_selected_field->next_selected_field;
+		}
+		select_list_pointer->next_select = select_list_pointer->next_select->next_select;
+	}
+	select_list_pointer->next_select = auxiliary_select_pointer;
+	selected_fields_list_pointer->next_selected_field = auxiliary_selected_fields_pointer;
+}
+
+void validate_selected_fields(selected_fields_instance *selected_fields_list_pointer, element_instance *element_list_pointer)
+{
+	element_instance *auxiliary_element_pointer;
+	auxiliary_element_pointer = element_list_pointer->next_element;
+	selected_fields_instance *auxiliary_selected_fields_pointer;
+	auxiliary_selected_fields_pointer = selected_fields_list_pointer->next_selected_field;
+	while(selected_fields_list_pointer->next_selected_field != NULL)
+	{
+		while(auxiliary_element_pointer != NULL)
+		{	
+			if(strcmp(selected_fields_list_pointer->next_selected_field->field_name, "*") == 0)
+			{
+				if(strcmp(selected_fields_list_pointer->next_selected_field->select->entity_name, auxiliary_element_pointer->entity_name) == 0)
+				{
+					selected_fields_list_pointer->next_selected_field->validity = VALID;
+					break;
+				}
+			}
+			else
+				{
+					if(auxiliary_element_pointer->element_scope == COLUMN)
+					{
+						if(strcmp(selected_fields_list_pointer->next_selected_field->select->entity_name, auxiliary_element_pointer->entity_name) == 0
+						&& strcmp(selected_fields_list_pointer->next_selected_field->field_name, auxiliary_element_pointer->element_name) == 0)
+						{
+							selected_fields_list_pointer->next_selected_field->validity = VALID;
+							break;
+						}
+					}
+				}
+			auxiliary_element_pointer = auxiliary_element_pointer->next_element;	
+		}
+		auxiliary_element_pointer = element_list_pointer->next_element;
+		selected_fields_list_pointer->next_selected_field = selected_fields_list_pointer->next_selected_field->next_selected_field;
+	}
+	selected_fields_list_pointer->next_selected_field = auxiliary_selected_fields_pointer;
 }
 
 char *write_file_name(char name_array[][MAX], char type)

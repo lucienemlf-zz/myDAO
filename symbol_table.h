@@ -55,17 +55,30 @@ struct selected_fields
 	struct selected_fields *next_selected_field;
 };
 
+struct foreign_key
+{
+	char foreign_key[MAX];
+	char table[MAX];
+	char table_primary_key[MAX];
+
+	struct foreign_key *next_foreign_key; 
+};
+
 //Structures
 typedef struct element element_instance;
 typedef struct entity entity_instance;
 typedef struct select select_instance;
 typedef struct selected_fields selected_fields_instance;
+typedef struct foreign_key foreign_key_instance;
+
 
 //Pointers
 element_instance *element_list_pointer;
 entity_instance *entity_list_pointer;
 select_instance *select_list_pointer;
 selected_fields_instance *selected_fields_list_pointer;
+foreign_key_instance *foreign_key_list_pointer;
+
 
 // Inicialização das listas
 element_instance *initialize_element_list(element_instance *list_pointer)
@@ -89,6 +102,13 @@ select_instance *initialize_select_list(select_instance *list_pointer)
 	return list_pointer;
 }
 
+foreign_key_instance *initialize_foreign_list(foreign_key_instance *list_pointer)
+{
+	list_pointer = (foreign_key_instance*) malloc (sizeof(foreign_key_instance));
+	list_pointer->next_foreign_key = NULL;
+	return list_pointer;
+}
+
 selected_fields_instance *initialize_selected_fields_list(selected_fields_instance *list_pointer)
 {
 	list_pointer = (selected_fields_instance*) malloc (sizeof(selected_fields_instance));
@@ -101,12 +121,14 @@ selected_fields_instance *initialize_selected_fields_list(selected_fields_instan
 void insert_element(element_instance *list_pointer, char element_name_insert[MAX], int element_scope_insert, char element_type_insert[MAX]);
 void insert_entity(entity_instance *list_pointer, element_instance *element_insert);
 void insert_select(select_instance *list_pointer, int selection_fields, char entity_name[MAX]);
+void insert_foreign_key(foreign_key_instance *list_pointer, char table[MAX], char table_primary_key[MAX], char foreign_key[MAX]);
 void insert_selected_fields(selected_fields_instance *list_pointer, char field_name[MAX]);
 void create_entity_list(element_instance *list_pointer);
 int print_element_list(element_instance *list_pointer);
 int is_pk(element_instance *list_pointer, char primary_key[MAX]);
 void print_entity_list(entity_instance *list_pointer);
 void print_select_list(select_instance *list_pointer);
+void print_foreign_key_list(foreign_key_instance *list_pointer);
 void print_selected_fields_list(selected_fields_instance *list_pointer);
 void associate_select_selected_fields(selected_fields_instance *selected_fields_list_pointer, select_instance *select_list_pointer);
 void validate_selected_fields(selected_fields_instance *selected_fields_list_pointer, element_instance *element_list_pointer);
@@ -157,6 +179,18 @@ void insert_select(select_instance *list_pointer, int selection_fields, char ent
 	first_select = list_pointer->next_select;
 	list_pointer->next_select = new_select;
 	new_select->next_select = first_select;
+}
+
+void insert_foreign_key(foreign_key_instance *list_pointer, char table[MAX], char table_primary_key[MAX], char foreign_key[MAX])
+{
+	foreign_key_instance *new_foreign_key, *first_foreign_key;
+	new_foreign_key = (foreign_key_instance*) malloc(sizeof(foreign_key_instance));
+	strcpy(new_foreign_key->table, table);
+	strcpy(new_foreign_key->table_primary_key, table_primary_key);
+	strcpy(new_foreign_key->foreign_key, foreign_key);
+	first_foreign_key = list_pointer->next_foreign_key;
+	list_pointer->next_foreign_key = new_foreign_key;
+	new_foreign_key->next_foreign_key = first_foreign_key;
 }
 
 void insert_selected_fields(selected_fields_instance *list_pointer,char field_name[MAX])
@@ -266,6 +300,24 @@ void print_select_list(select_instance *list_pointer)
 		list_pointer->next_select = list_pointer->next_select->next_select;
 	}
 	list_pointer->next_select = auxiliary_pointer;
+}
+
+void print_foreign_key_list(foreign_key_instance *list_pointer)
+{
+	if(list_pointer == NULL)
+	{ 
+		printf("There is no foreign key.\n");
+		exit(1);
+	}
+
+	foreign_key_instance *auxiliary_pointer;
+	auxiliary_pointer = list_pointer->next_foreign_key;
+	while(auxiliary_pointer != NULL)
+	{	
+	    printf("FOREIGN_KEY %s REFERENCES %s(%s) \n",auxiliary_pointer->foreign_key, auxiliary_pointer->table, auxiliary_pointer->table_primary_key);
+
+		auxiliary_pointer = auxiliary_pointer->next_foreign_key;
+	}
 }
 
 void print_selected_fields_list(selected_fields_instance *list_pointer)

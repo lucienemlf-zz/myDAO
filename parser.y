@@ -38,6 +38,15 @@
 
 %% /* Regras */
 
+/*
+  Validações FK:
+    - validar se parametro existe na tabela
+    - se existe a tabela referenciada
+    - se existe atributo da tabela referenciada
+
+
+*/
+
 Start_create_table:
   T_CREATE T_TABLE D_STRING '(' Create_column {insert_element(element_list_pointer, $3, ENTITY, "TABLE");}
 ;
@@ -48,7 +57,7 @@ Create_primary_key:
 ;
 
 Create_foreign_key:
-   T_FOREIGN_KEY '(' D_STRING ')' T_REFERENCES D_STRING'(' D_STRING ')' Finish_create_table {insert_element(element_list_pointer, $3, FOREIGN_KEY, "FOREIGN_KEY");}
+   T_FOREIGN_KEY '(' D_STRING ')' T_REFERENCES D_STRING'(' D_STRING ')' Finish_create_table {insert_foreign_key(foreign_key_list_pointer, $6, $8, $3);}
 ;
 
 Finish_create_table:
@@ -111,10 +120,14 @@ int main(int argc, char *argv[])
   entity_list_pointer = initialize_entity_list(entity_pointer);
 
   select_instance *select_pointer;
-  select_list_pointer = initialize_select_list(select_pointer);
+  select_list_pointer = initialize_select_list(select_pointer);  
+
 
   selected_fields_instance *selected_fields_pointer;
   selected_fields_list_pointer = initialize_selected_fields_list(selected_fields_pointer);
+
+  foreign_key_instance *foreign_key_pointer;
+  foreign_key_list_pointer = initialize_foreign_list(foreign_key_pointer);
 
   char *sql_file_name;
 
@@ -159,6 +172,10 @@ int main(int argc, char *argv[])
 
   printf("Selects found... \n");
   print_select_list(select_list_pointer);
+  printf("\n"); 
+
+  printf("Foreign Keys found... \n");
+  print_foreign_key_list(foreign_key_list_pointer);
   printf("\n");
 
   associate_select_selected_fields(selected_fields_list_pointer, select_list_pointer);

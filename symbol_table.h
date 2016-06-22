@@ -11,7 +11,7 @@
 #define ENTITY 0
 
 #define PRIMARY_KEY 2
-#define NO_PRIMARY_KEY 3
+#define FOREIGN_KEY 3
 
 #define FOUND 1
 #define NOT_FOUND 0

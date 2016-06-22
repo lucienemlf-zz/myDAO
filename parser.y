@@ -19,6 +19,8 @@
 %token T_SELECT
 %token T_FROM
 %token T_PRIMARY_KEY
+%token T_FOREIGN_KEY
+%token T_REFERENCES
 %token T_STRING
 %token T_INT
 %token T_VARCHAR
@@ -40,9 +42,17 @@ Start_create_table:
   T_CREATE T_TABLE D_STRING '(' Create_column {insert_element(element_list_pointer, $3, ENTITY, "TABLE");}
 ;
 
-Finish_create_table:
-  T_PRIMARY_KEY '(' D_STRING ')'')' ';' {insert_element(element_list_pointer, $3, PRIMARY_KEY, "PRIMARY_KEY");} 
+Create_primary_key:
+  T_PRIMARY_KEY '(' D_STRING ')'',' Create_foreign_key {insert_element(element_list_pointer, $3, PRIMARY_KEY, "PRIMARY_KEY");} 
+  | T_PRIMARY_KEY '(' D_STRING ')' Finish_create_table {insert_element(element_list_pointer, $3, PRIMARY_KEY, "PRIMARY_KEY");}
+;
 
+Create_foreign_key:
+   T_FOREIGN_KEY '(' D_STRING ')' T_REFERENCES D_STRING'(' D_STRING ')' Finish_create_table {insert_element(element_list_pointer, $3, FOREIGN_KEY, "FOREIGN_KEY");}
+;
+
+Finish_create_table:
+  ')' ';'
 ;
 
 Create_select_query:
@@ -67,7 +77,7 @@ Type_constraint:
 ;
 
 Create_column:
-  D_STRING Type_specifier Type_constraint ',' Finish_create_table {insert_element(element_list_pointer, $1, COLUMN, $2);}
+  D_STRING Type_specifier Type_constraint ',' Create_primary_key {insert_element(element_list_pointer, $1, COLUMN, $2);}
   | D_STRING Type_specifier Type_constraint ',' Create_column {insert_element(element_list_pointer, $1, COLUMN, $2);}
 ;
 

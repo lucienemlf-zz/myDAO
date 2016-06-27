@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
     int validade_entity = search_entity(auxiliary_pointer_dao->entity_name);
     if (validade_entity == 1)
     {
-      write_java_DAO_file(auxiliary_pointer_dao->element, elements_number, auxiliary_pointer_dao->entity_name);
+      write_java_DAO_file(auxiliary_pointer_dao->element, elements_number, auxiliary_pointer_dao->entity_name, select_list_pointer, selected_fields_list_pointer);
     }
     else
     {

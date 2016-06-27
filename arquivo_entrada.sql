@@ -12,8 +12,6 @@ chassi INT,
 PRIMARY KEY (chassi)
 );
 
-SELECT name,cpf FROM person;
+SELECT cpf FROM person;
 
-SELECT mounter,chassi,blablabla FROM Car;
-
-SELECT * FROM pessoa;
+SELECT mounter,chassi FROM Car;

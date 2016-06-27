@@ -2,7 +2,9 @@ CREATE TABLE person (
 name INT NOT NULL CHECK,
 cpf VARCHAR,
 phone INT,
-PRIMARY KEY (cpf)
+carrochassi INT,
+PRIMARY KEY (cpf),
+FOREIGN KEY (carrochassi) REFERENCES carro(chassi)
 );
 
 CREATE TABLE Car (

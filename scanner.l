@@ -26,8 +26,9 @@ ANY_CHAR .
 "SELECT" { return T_SELECT;}
 "FROM" { return T_FROM;}
 "PRIMARY KEY" {return T_PRIMARY_KEY;}
+"FOREIGN KEY" {return T_FOREIGN_KEY;}
+"REFERENCES" {return T_REFERENCES;}
 [\(\)\{\}:;=,] {return yytext[0];}
-
 {IGNORE} {return T_IGNORE;}
 {STRING} {yylval.strval = strdup(yytext);return D_STRING;}
 {INTEGER} { return D_INTEGER; }

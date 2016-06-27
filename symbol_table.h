@@ -11,7 +11,7 @@
 #define ENTITY 0
 
 #define PRIMARY_KEY 2
-#define NO_PRIMARY_KEY 3
+#define FOREIGN_KEY 3
 
 #define FOUND 1
 #define NOT_FOUND 0
@@ -55,17 +55,30 @@ struct selected_fields
 	struct selected_fields *next_selected_field;
 };
 
+struct foreign_key
+{
+	char foreign_key[MAX];
+	char table[MAX];
+	char table_primary_key[MAX];
+
+	struct foreign_key *next_foreign_key; 
+};
+
 //Structures
 typedef struct element element_instance;
 typedef struct entity entity_instance;
 typedef struct select select_instance;
 typedef struct selected_fields selected_fields_instance;
+typedef struct foreign_key foreign_key_instance;
+
 
 //Pointers
 element_instance *element_list_pointer;
 entity_instance *entity_list_pointer;
 select_instance *select_list_pointer;
 selected_fields_instance *selected_fields_list_pointer;
+foreign_key_instance *foreign_key_list_pointer;
+
 
 // Inicialização das listas
 element_instance *initialize_element_list(element_instance *list_pointer)
@@ -89,6 +102,13 @@ select_instance *initialize_select_list(select_instance *list_pointer)
 	return list_pointer;
 }
 
+foreign_key_instance *initialize_foreign_list(foreign_key_instance *list_pointer)
+{
+	list_pointer = (foreign_key_instance*) malloc (sizeof(foreign_key_instance));
+	list_pointer->next_foreign_key = NULL;
+	return list_pointer;
+}
+
 selected_fields_instance *initialize_selected_fields_list(selected_fields_instance *list_pointer)
 {
 	list_pointer = (selected_fields_instance*) malloc (sizeof(selected_fields_instance));
@@ -101,17 +121,21 @@ selected_fields_instance *initialize_selected_fields_list(selected_fields_instan
 void insert_element(element_instance *list_pointer, char element_name_insert[MAX], int element_scope_insert, char element_type_insert[MAX]);
 void insert_entity(entity_instance *list_pointer, element_instance *element_insert);
 void insert_select(select_instance *list_pointer, int selection_fields, char entity_name[MAX]);
+void insert_foreign_key(foreign_key_instance *list_pointer, char table[MAX], char table_primary_key[MAX], char foreign_key[MAX]);
 void insert_selected_fields(selected_fields_instance *list_pointer, char field_name[MAX]);
 void create_entity_list(element_instance *list_pointer);
 int print_element_list(element_instance *list_pointer);
+int is_pk(element_instance *list_pointer, char primary_key[MAX]);
 void print_entity_list(entity_instance *list_pointer);
 void print_select_list(select_instance *list_pointer);
+void print_foreign_key_list(foreign_key_instance *list_pointer);
 void print_selected_fields_list(selected_fields_instance *list_pointer);
 void associate_select_selected_fields(selected_fields_instance *selected_fields_list_pointer, select_instance *select_list_pointer);
 void validate_selected_fields(selected_fields_instance *selected_fields_list_pointer, element_instance *element_list_pointer);
 
 // Declaração das funcões relacionadas a geração de código
 char *write_file_name(char name_array[][MAX], char type);
+char *getPK(element_instance *list_pointer); 
 char **write_array_type(int dimension, int i, char type_array[][MAX]);
 void mount_method_insert(FILE *file_out, char name_array[][MAX],  char type_array[][MAX],int real_dimension, char primary_key[MAX]);
 void mount_method_select(FILE *file_out, char name_array[][MAX], char type_array[][MAX], int real_dimension, char primary_key[MAX]);
@@ -155,6 +179,18 @@ void insert_select(select_instance *list_pointer, int selection_fields, char ent
 	first_select = list_pointer->next_select;
 	list_pointer->next_select = new_select;
 	new_select->next_select = first_select;
+}
+
+void insert_foreign_key(foreign_key_instance *list_pointer, char table[MAX], char table_primary_key[MAX], char foreign_key[MAX])
+{
+	foreign_key_instance *new_foreign_key, *first_foreign_key;
+	new_foreign_key = (foreign_key_instance*) malloc(sizeof(foreign_key_instance));
+	strcpy(new_foreign_key->table, table);
+	strcpy(new_foreign_key->table_primary_key, table_primary_key);
+	strcpy(new_foreign_key->foreign_key, foreign_key);
+	first_foreign_key = list_pointer->next_foreign_key;
+	list_pointer->next_foreign_key = new_foreign_key;
+	new_foreign_key->next_foreign_key = first_foreign_key;
 }
 
 void insert_selected_fields(selected_fields_instance *list_pointer,char field_name[MAX])
@@ -264,6 +300,24 @@ void print_select_list(select_instance *list_pointer)
 		list_pointer->next_select = list_pointer->next_select->next_select;
 	}
 	list_pointer->next_select = auxiliary_pointer;
+}
+
+void print_foreign_key_list(foreign_key_instance *list_pointer)
+{
+	if(list_pointer == NULL)
+	{ 
+		printf("There is no foreign key.\n");
+		exit(1);
+	}
+
+	foreign_key_instance *auxiliary_pointer;
+	auxiliary_pointer = list_pointer->next_foreign_key;
+	while(auxiliary_pointer != NULL)
+	{	
+	    printf("FOREIGN_KEY %s REFERENCES %s(%s) \n",auxiliary_pointer->foreign_key, auxiliary_pointer->table, auxiliary_pointer->table_primary_key);
+
+		auxiliary_pointer = auxiliary_pointer->next_foreign_key;
+	}
 }
 
 void print_selected_fields_list(selected_fields_instance *list_pointer)
@@ -438,34 +492,20 @@ char **write_array_type(int dimension, int i, char type_array[][MAX])
 	return type_out;
 }
 
-void write_java_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX])
+// Recuperando PK
+char *getPK(element_instance *list_pointer) 
 {
-	FILE *file_out;
-	char name_array[dimension][MAX];
-	char name_upcase[dimension][MAX];
-	char type_array[dimension][MAX];
-	int i, real_dimension = 0;
 
-	if(list_pointer == NULL)
-	{
-		printf("There is no instance.\n");
-		exit(1);
-	}
-
-
-	// Recuperando PK
 	element_instance *auxiliary_pk;
 	auxiliary_pk = list_pointer;
 	int m = 0;
-	char table_name[MAX];
-	char primary_key[MAX];
+	static char primary_key[MAX];
 	for (m = 0; auxiliary_pk != NULL; m++)
 	{
 
 		if(auxiliary_pk->element_scope == PRIMARY_KEY)
 		{
 			strcpy(primary_key, auxiliary_pk ->element_name);
-			strcpy(table_name, auxiliary_pk ->entity_name);
 		}
 
 		if((auxiliary_pk->next_element == NULL) || (auxiliary_pk->next_element->element_scope == 0))
@@ -476,7 +516,13 @@ void write_java_file(element_instance *list_pointer, int dimension, char entity_
 		auxiliary_pk = auxiliary_pk->next_element;
 	}
 
-	// Validando PK
+	return primary_key;
+}
+
+// Validando PK	
+int is_pk(element_instance *list_pointer, char primary_key[MAX])
+{
+
 	element_instance *auxiliary_pkey;
 	auxiliary_pkey = list_pointer;
 	int found = 0;
@@ -500,9 +546,34 @@ void write_java_file(element_instance *list_pointer, int dimension, char entity_
 	 	auxiliary_pkey = auxiliary_pkey->next_element;
 	 }
 
+	 return found;
+}
+
+
+
+void write_java_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX])
+{
+	FILE *file_out;
+	char name_array[dimension][MAX];
+	char name_upcase[dimension][MAX];
+	char type_array[dimension][MAX];
+	int i, real_dimension = 0;
+
+	if(list_pointer == NULL)
+	{
+		printf("There is no instance.\n");
+		exit(1);
+	}
+
+	char *primary_key;
+	primary_key = getPK(list_pointer);
+
+
+	int found = is_pk(list_pointer, primary_key);
+
 	 // Imprime mensagens de erro caso PK não exista na tabela
 	 if(found == 0){
-	 	printf("\nThis field: %s, does not exist on the table %s! Please check your sql file.\n", primary_key, table_name);
+	 	printf("\nThis field: %s, does not exist! Please check your sql file.\n", primary_key);
 		exit(1);
 	 }
 

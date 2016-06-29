@@ -16,4 +16,6 @@ PRIMARY KEY (chassi)
 
 SELECT cpf FROM person;
 
+SELECT plate FROM Car;
+
 SELECT mounter,chassi FROM Car;

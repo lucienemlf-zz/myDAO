@@ -1102,11 +1102,9 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 	{
 		if(strcmp(auxiliary_seleted_list->select->entity_name, name_array[0]) == 0)
 		{
-			printf("%s\n",auxiliary_seleted_list->select->entity_name);
-			printf("%s\n",auxiliary_seleted_list->field_name);
 			strcpy(selected_fields_array[counter], auxiliary_seleted_list->field_name);
+			counter++;
 		}
-		counter++;
 		auxiliary_seleted_list = auxiliary_seleted_list->next_selected_field;
 	}
 
@@ -1129,6 +1127,7 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 			auxiliary_pointer->element_scope == COLUMN)
 		{
 			strcpy(selected_fields_type_array[type_counter], auxiliary_pointer->element_type);
+			printf("Debug type - %s.\n",auxiliary_pointer->element_type);
 		}
 
 		if(auxiliary_pointer->next_element == NULL)

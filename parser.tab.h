@@ -52,13 +52,15 @@ extern int yydebug;
     T_SELECT = 262,
     T_FROM = 263,
     T_PRIMARY_KEY = 264,
-    T_STRING = 265,
-    T_INT = 266,
-    T_VARCHAR = 267,
-    T_FLOAT = 268,
-    D_STRING = 269,
-    D_INTEGER = 270,
-    D_FLOAT = 271
+    T_FOREIGN_KEY = 265,
+    T_REFERENCES = 266,
+    T_STRING = 267,
+    T_INT = 268,
+    T_VARCHAR = 269,
+    T_FLOAT = 270,
+    D_STRING = 271,
+    D_INTEGER = 272,
+    D_FLOAT = 273
   };
 #endif
 
@@ -71,7 +73,7 @@ union YYSTYPE
 
   char * strval;
 
-#line 75 "parser.tab.h" /* yacc.c:1909  */
+#line 77 "parser.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

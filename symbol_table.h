@@ -29,6 +29,7 @@ struct element
 	char element_type[MAX];
 	struct element *next_element;
 	char entity_name[MAX];
+	
 };
 
 //Structure for Entities

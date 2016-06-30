@@ -1037,7 +1037,11 @@ void mount_method_specific_select(FILE *file_out, char name_array[][MAX], select
 	int z;
 	for(z = offset; z < offset + select_list_pointer_write->selection_fields; z++)
 	{
-		fprintf(file_out, "%s", selected_fields_array[z]);
+		char capital_column[MAX];
+		strcpy(capital_column, selected_fields_array[z]);
+		capitalize_name(capital_column);
+
+		fprintf(file_out, "%s", capital_column);
 	}
 	fprintf(file_out, "All() throws SQLException {\n");
 	fprintf(file_out, "\t\tString sql = 'SELECT ");
@@ -1214,10 +1218,14 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 	fprintf(file_out, "import java.sql.PreparedStatement;\n");
 	fprintf(file_out, "import java.sql.ResultSet;\n");
 	fprintf(file_out, "import java.sql.SQLException;\n");
+	fprintf(file_out, "import java.sql.DriverManager;\n");
 	fprintf(file_out, "import java.util.ArrayList;\n\n");
 
 	fprintf(file_out, "public class %sDAO {\n", entity_name_pascalcase);
 	fprintf(file_out, "\n");
+
+	fprintf(file_out, "\tprivate Connection conn = DriverManager.getConnection(dbURL, username, password);");
+	fprintf(file_out, "\n\n");
 
 	mount_method_insert(file_out, name_array, type_array, real_dimension, primary_key);
 	fprintf(file_out, "\n\n");

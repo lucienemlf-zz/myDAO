@@ -143,6 +143,7 @@ void mount_method_select(FILE *file_out, char name_array[][MAX], char type_array
 void mount_method_select_all(FILE *file_out, char name_array[][MAX], char type_array[][MAX], int real_dimension, char primary_key[MAX]);
 void mount_method_update(FILE *file_out, char name_array[][MAX], char type_array[][MAX], int real_dimension, char primary_key[MAX]);
 void mount_method_delete(FILE *file_out, char name_array[][MAX], char type_array[][MAX], int real_dimension, char primary_key[MAX]);
+void mount_method_specific_select(FILE *file_out, char name_array[][MAX], select_instance* select_list_pointer, char selected_fields_array[][MAX], char selected_fields_type_array[][MAX], int offset);
 void write_java_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX]);
 void write_java_DAO_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX], select_instance *select_list_pointer, selected_fields_instance *selected_fields_list_pointer);
 void capitalize_name(char capitalized_name[MAX]);	
@@ -1017,8 +1018,64 @@ void mount_method_select_all(FILE *file_out, char name_array[][MAX], char type_a
 		
 }
 
-void mount_method_specific_select(char array_name[][MAX])
+void mount_method_specific_select(FILE *file_out, char name_array[][MAX], select_instance* select_list_pointer_write, char selected_fields_array[][MAX], char selected_fields_type_array[][MAX], int offset)
 {
+
+	char entity_name_pascalcase[MAX];
+	strcpy(entity_name_pascalcase, name_array[0]);
+	capitalize_name(entity_name_pascalcase);
+
+	char lowercase_entity_name[MAX];
+	strcpy(lowercase_entity_name, name_array[0]);
+	uncapitalize_name(lowercase_entity_name);
+
+	int k = 0;
+	char **type_out;
+	type_out = write_array_type(select_list_pointer_write->selection_fields, k, selected_fields_type_array);
+
+	fprintf(file_out, "	public ArrayList<%s> select",entity_name_pascalcase);
+	int z;
+	for(z = offset; z < offset + select_list_pointer_write->selection_fields; z++)
+	{
+		fprintf(file_out, "%s", selected_fields_array[z]);
+	}
+	fprintf(file_out, "All() throws SQLException {\n");
+	fprintf(file_out, "\t\tString sql = 'SELECT ");
+	for(z = offset; z < offset + select_list_pointer_write->selection_fields; z++)
+	{
+		fprintf(file_out, "%s", selected_fields_array[z]);
+		if(z != (offset + select_list_pointer_write->selection_fields - 1))
+			fprintf(file_out, ",");
+	}
+	fprintf(file_out, " FROM %s';\n", entity_name_pascalcase);
+	fprintf(file_out, "\t\tArrayList<%s> %ss = new ArrayList<>();\n", entity_name_pascalcase, lowercase_entity_name);
+	fprintf(file_out, "\t\tPreparedStatement statement = conn.preparedStatement(sql);\n");
+	fprintf(file_out, "\t\tResultSet result = statement.executeQuery(sql);\n"); 
+
+	fprintf(file_out, "\t\twhile (result.next()) {\n");
+	fprintf(file_out, "\t\t\t%s %s = new %s();\n", entity_name_pascalcase, lowercase_entity_name, entity_name_pascalcase);
+
+	int i = 0,j = 1;
+	for(i = 0; i < select_list_pointer_write->selection_fields; i++)
+	{
+		char capital_column_name[MAX];
+		strcpy(capital_column_name, selected_fields_array[i]);
+		capitalize_name(capital_column_name);
+
+		char capital_type_column[MAX];
+		strcpy(capital_type_column, type_out[i]);
+		capitalize_name(capital_type_column);
+
+		fprintf(file_out, "\t\t\t%s.set%s(result.get%s(%d));\n", lowercase_entity_name, capital_column_name, capital_type_column, i);
+		j++;
+	}
+	fprintf(file_out, "\t\t\tif (%s != null) {\n", lowercase_entity_name);
+	fprintf(file_out, "\t\t\t\t%ss.add(%s);\n", lowercase_entity_name, lowercase_entity_name);
+	fprintf(file_out, "\t\t\t}\n");
+	fprintf(file_out, "\t\t}\n");
+	fprintf(file_out, "\t\treturn %ss;\n", lowercase_entity_name);
+	
+	fprintf(file_out, "\t}");
 
 }
 
@@ -1052,8 +1109,6 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 				strcpy(name_array[i], auxiliary_pointer->element_name);
 				strcpy(type_array[i], auxiliary_pointer->element_type);
 				real_dimension++;
-				printf("name_array[%d]: %s.\n",i, name_array[i]);
-				printf("type_array[%d]: %s.\n",i, type_array[i]);
 			}
 
 		}
@@ -1089,29 +1144,20 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 		auxiliary_select_pointer = auxiliary_select_pointer->next_select;
 	}
 
-	printf("Numero de selects: %d.\n", number_specific_selects);
-	printf("Numero de campos de select: %d.\n", number_of_selected_fields);
-
-	selected_fields_instance *auxiliary_seleted_list;
-	auxiliary_seleted_list = selected_fields_list_pointer->next_selected_field;
+	selected_fields_instance *auxiliary_selected_list;
+	auxiliary_selected_list = selected_fields_list_pointer->next_selected_field;
 
 	char selected_fields_array[number_of_selected_fields][MAX];
 
 	int counter = 0;
-	while(auxiliary_seleted_list != NULL)
+	while(auxiliary_selected_list != NULL)
 	{
-		if(strcmp(auxiliary_seleted_list->select->entity_name, name_array[0]) == 0)
+		if(strcmp(auxiliary_selected_list->select->entity_name, name_array[0]) == 0)
 		{
-			strcpy(selected_fields_array[counter], auxiliary_seleted_list->field_name);
+			strcpy(selected_fields_array[counter], auxiliary_selected_list->field_name);
 			counter++;
 		}
-		auxiliary_seleted_list = auxiliary_seleted_list->next_selected_field;
-	}
-
-	int z;
-	for(z = 0; z < number_of_selected_fields; z++)
-	{
-		printf("%s.\n",selected_fields_array[z]);
+		auxiliary_selected_list = auxiliary_selected_list->next_selected_field;
 	}
 
 	char selected_fields_type_array[number_of_selected_fields][MAX];
@@ -1127,7 +1173,6 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 			auxiliary_pointer->element_scope == COLUMN)
 		{
 			strcpy(selected_fields_type_array[type_counter], auxiliary_pointer->element_type);
-			printf("Debug type - %s.\n",auxiliary_pointer->element_type);
 		}
 
 		if(auxiliary_pointer->next_element == NULL)
@@ -1141,12 +1186,6 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 
 		auxiliary_pointer = auxiliary_pointer->next_element;
 		}
-	}
-
-	int k;
-	for(k = 0; k < number_of_selected_fields; k++)
-	{
-		printf("Tipo para %s element e igual a %s.\n",selected_fields_array[k], selected_fields_type_array[k]);
 	}
 
 	FILE *file_out;
@@ -1193,13 +1232,29 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 	fprintf(file_out, "\n\n");
 
 	mount_method_delete(file_out, name_array, type_array, real_dimension, primary_key);
+	fprintf(file_out, "\n\n");
+	select_instance *auxiliary_select_pointer_write;
+	auxiliary_select_pointer_write = select_list_pointer->next_select;
+
+	int offset = 0;
+
+	while(auxiliary_select_pointer_write != NULL)
+	{
+		if(strcmp(auxiliary_select_pointer_write->entity_name, name_array[0]) == 0)
+		{
+			mount_method_specific_select(file_out, name_array, auxiliary_select_pointer_write, selected_fields_array, selected_fields_type_array, offset);
+			fprintf(file_out, "\n\n");
+			offset = offset + auxiliary_select_pointer_write->selection_fields;
+		}
+		auxiliary_select_pointer_write = auxiliary_select_pointer_write->next_select;
+	}
 
 	fprintf(file_out, "\n}");
 
 	printf("Writing java %sDAO file completed.\n",entity_name_pascalcase);
 
 	free(auxiliary_select_pointer);
-	free(auxiliary_seleted_list);
+	free(auxiliary_selected_list);
 }
 
 void split(char select_fields[MAX], char select_fields_array[][MAX])

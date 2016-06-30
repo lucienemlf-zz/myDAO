@@ -65,7 +65,7 @@ Finish_create_table:
 ;
 
 Create_select_query:
-  T_SELECT Selection_fields T_FROM D_STRING ';' {printf("--------> %d\n", select_fields_counter);insert_select(select_list_pointer, select_fields_counter, $4);select_fields_counter = 0;}
+  T_SELECT Selection_fields T_FROM D_STRING ';' {insert_select(select_list_pointer, select_fields_counter, $4);select_fields_counter = 0;}
 ;
 
 Selection_fields:

@@ -563,18 +563,17 @@ void write_basic_dao_file()
 
 	file_out = fopen(folder_name, "w");
 
-	fprintf(file_out, "import java.sql.Connection;\n\n");
+	fprintf(file_out, "import java.sql.Connection;\n");
+	fprintf(file_out, "import java.sql.DriverManager;\n\n");
 
 	fprintf(file_out, "public class BasicDAO {\n\n");
 
-	fprintf(file_out, "\tprivate static String databaseLocate = \"jdbc:mysql://\";\n");
-	fprintf(file_out, "\tprivate static String serverName = \"localhost\";\n");
-	fprintf(file_out, "\tprivate static String databaseName = \"test\";\n");
-	fprintf(file_out, "\tprivate static String user = \"root\";\n");
-	fprintf(file_out, "\tprivate static String password = \"root\";\n\n");
-	fprintf(file_out, "\tprotected Connection conn;\n\n");
-	fprintf(file_out, "\tthis.conn = DriverManager.getConnection(databaseLocate + serverName + \"/\" + databaseName, user, password);");
-	fprintf(file_out, "\n");
+	fprintf(file_out, "\tprotected static String databaseLocate = \"jdbc:mysql://\";\n");
+	fprintf(file_out, "\tprotected static String serverName = \"localhost\";\n");
+	fprintf(file_out, "\tprotected static String databaseName = \"test\";\n");
+	fprintf(file_out, "\tprotected static String user = \"root\";\n");
+	fprintf(file_out, "\tprotected static String password = \"root\";\n\n");
+	fprintf(file_out, "\tprotected Connection conn = DriverManager.getConnection(databaseLocate + serverName + \"/\" + databaseName, user, password);\n\n");
 
 	fprintf(file_out, "}");
 	fclose(file_out);

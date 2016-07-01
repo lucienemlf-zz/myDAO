@@ -147,6 +147,7 @@ void mount_method_specific_select(FILE *file_out, char name_array[][MAX], select
 void write_java_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX]);
 void write_java_DAO_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX], select_instance *select_list_pointer, selected_fields_instance *selected_fields_list_pointer);
 void capitalize_name(char capitalized_name[MAX]);	
+void write_basic_dao_file();
 
 void insert_element(element_instance *list_pointer, char element_name_insert[MAX], int element_scope_insert, char element_type_insert[MAX])
 {
@@ -494,7 +495,6 @@ char **write_array_type(int dimension, int i, char type_array[][MAX])
 	return type_out;
 }
 
-// Recuperando PK
 char *getPK(element_instance *list_pointer) 
 {
 
@@ -521,7 +521,6 @@ char *getPK(element_instance *list_pointer)
 	return primary_key;
 }
 
-// Validando PK	
 int is_pk(element_instance *list_pointer, char primary_key[MAX])
 {
 
@@ -551,7 +550,35 @@ int is_pk(element_instance *list_pointer, char primary_key[MAX])
 	 return found;
 }
 
+void write_basic_dao_file()
+{
+	FILE *file_out;
+	char file_out_name[MAX];
 
+	strcpy(file_out_name, "BasicDAO.java");
+
+	char folder_name[MAX];
+	strcpy(folder_name, "DAO/");
+	strcat(folder_name,file_out_name);
+
+	file_out = fopen(folder_name, "w");
+
+	fprintf(file_out, "import java.sql.Connection;\n\n");
+
+	fprintf(file_out, "public class BasicDAO {\n\n");
+
+	fprintf(file_out, "\tprivate static String databaseLocate = \"jdbc:mysql://\";\n");
+	fprintf(file_out, "\tprivate static String serverName = \"localhost\";\n");
+	fprintf(file_out, "\tprivate static String databaseName = \"test\";\n");
+	fprintf(file_out, "\tprivate static String user = \"root\";\n");
+	fprintf(file_out, "\tprivate static String password = \"root\";\n\n");
+	fprintf(file_out, "\tprotected Connection conn;\n\n");
+	fprintf(file_out, "\tthis.conn = DriverManager.getConnection(databaseLocate + serverName + \"/\" + databaseName, user, password);");
+	fprintf(file_out, "\n");
+
+	fprintf(file_out, "}");
+	fclose(file_out);
+}
 
 void write_java_file(element_instance *list_pointer, int dimension, char entity_name_validate[MAX])
 {
@@ -1221,11 +1248,8 @@ void write_java_DAO_file(element_instance *list_pointer, int dimension, char ent
 	fprintf(file_out, "import java.sql.DriverManager;\n");
 	fprintf(file_out, "import java.util.ArrayList;\n\n");
 
-	fprintf(file_out, "public class %sDAO {\n", entity_name_pascalcase);
+	fprintf(file_out, "public class %sDAO extends BasicDAO {\n", entity_name_pascalcase);
 	fprintf(file_out, "\n");
-
-	fprintf(file_out, "\tprivate Connection conn = DriverManager.getConnection(dbURL, username, password);");
-	fprintf(file_out, "\n\n");
 
 	mount_method_insert(file_out, name_array, type_array, real_dimension, primary_key);
 	fprintf(file_out, "\n\n");

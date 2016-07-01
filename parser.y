@@ -43,8 +43,6 @@
     - validar se parametro existe na tabela
     - se existe a tabela referenciada
     - se existe atributo da tabela referenciada
-
-
 */
 
 Start_create_table:
@@ -122,7 +120,6 @@ int main(int argc, char *argv[])
   select_instance *select_pointer;
   select_list_pointer = initialize_select_list(select_pointer);  
 
-
   selected_fields_instance *selected_fields_pointer;
   selected_fields_list_pointer = initialize_selected_fields_list(selected_fields_pointer);
 
@@ -157,9 +154,7 @@ int main(int argc, char *argv[])
 
   yyin = entry_file;
 
-  // Montar tabela de simbolos
   yyparse();
-
   
   printf("Elements found...\n");
   create_entity_list(element_list_pointer);
@@ -191,13 +186,6 @@ int main(int argc, char *argv[])
   printf("Folders succesfully created.\n\n");
 
   printf("Creating models files...\n");
-  
-  // parse
-
-  // Voltar o ponteiro de parse pro início do arquivo de entrada
-
-  // Faz as validações e cria os arquivos
-  //int i;
 
   entity_instance *auxiliary_pointer;
   auxiliary_pointer = entity_list_pointer->next_entity;
@@ -219,6 +207,10 @@ int main(int argc, char *argv[])
   printf("Models succesfully created.\n\n");
 
   printf("Creating DAOs files...\n");
+
+  printf("Creating BasicDAO file...\n");
+  write_basic_dao_file();
+  printf("BasicDAO file successfully created.\n\n");
 
   entity_instance *auxiliary_pointer_dao;
   auxiliary_pointer_dao = entity_list_pointer->next_entity;
@@ -243,6 +235,9 @@ int main(int argc, char *argv[])
  
   free(element_list_pointer);
   free(entity_list_pointer);
+  free(select_list_pointer);
+  free(selected_fields_list_pointer);
+  free(foreign_key_list_pointer);
  
   return 0;
 }
